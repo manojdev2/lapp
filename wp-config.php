@@ -93,7 +93,8 @@ define( 'WP_DEBUG', false );
 
 
 /* That's all, stop editing! Happy publishing. */
-
+define('WP_HOME', 'https://lapp-production.up.railway.app');
+define('WP_SITEURL', 'https://lapp-production.up.railway.app');
 /** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
