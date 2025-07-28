@@ -20,6 +20,7 @@
 
 // ** Database settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
+/** The name of the database for WordPress */
 define( 'DB_NAME', 'railway' );
 
 /** Database username */
@@ -28,8 +29,8 @@ define( 'DB_USER', 'root' );
 /** Database password */
 define( 'DB_PASSWORD', 'UuSIrUptmgXqUBPIeJoTNEYeerUbLUtg' );
 
-/** Database hostname */
-define( 'DB_HOST', 'mysql.railway.internal' );
+/** Database hostname (include port) */
+define( 'DB_HOST', 'shortline.proxy.rlwy.net:11086' );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8mb4' );
