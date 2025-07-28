@@ -1,0 +1,571 @@
+/* Tab Styles */
+.igual-admin-content-wrap {
+    background: #fff;
+}
+.igual-inner-wrap {
+    margin-top: 35px;
+}
+.igual-tab {
+    display: block;
+    overflow: hidden;
+    padding: 30px;
+}
+.igual-tab-list {
+    float: left;
+    border-right: 1px solid #fff;
+    background-color: #fff;
+    width: 15%;
+    height: 600px;
+    padding-bottom: 50px;
+}
+ul.tablinks-list {
+    position: relative;
+    overflow: hidden;
+	margin: 0;
+}
+.igual-tab-list .tablinks > span {
+    display: block;
+    background-color: inherit;
+    color: black;
+    padding: 0;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 16px;
+    font-weight: bold;
+	margin-bottom: 0;
+}
+.igual-tab-list .tablinks > span {
+    display: block;
+    padding: 11px 14px;
+}
+.igual_page_igual-options .igual-tab-list .tablinks > span {
+    display: block;
+    padding: 6px 14px;
+}
+.igual-tab-list .tablinks > span:hover {
+    background-color: #202020;
+    border-left: 3px solid #e7e7e7;
+    background: #1c0a7a;
+    background-image: -webkit-linear-gradient( -169deg, #1c0a7a 0%, #4a0788 100% );
+}
+.tablinks-list li.tablinks {
+    margin-bottom: 0;
+}
+ul.tablinks-list > li.tablinks > span {
+    background-color: #171717;
+    color: #f0f0f1;
+    font-size: 14px;
+    line-height: 18px;
+    border-left: 3px solid transparent;
+    font-weight: 400;
+}
+ul.tablinks-sub-list > li.tablinks > span {
+    background-color: #1c0a7a;
+    color: #fff;
+    font-size: 13px;
+    line-height: 18px;
+    border-left: 3px solid transparent;
+    font-weight: 400;
+}
+ul.tablinks-list > li.tablinks[data-id="cea-templates"] span.tab-title,
+ul.tablinks-list > li.tablinks[data-id="woocommerce-tab"] span.tab-title  {
+    padding: 10px 14px;
+}
+.tablinks-sub-list li.tablinks > .tab-title {
+    background: #272727;
+    padding: 9px 20px;
+}
+.tablinks-sub-list li.tablinks.active > .tab-title:after {
+    content: "\f141";
+    font-family: dashicons;
+    position: absolute;
+    right: -7px;
+    font-size: 20px;
+    z-index: 1;
+}
+ul.tablinks-list > li.tablinks {
+    height: 39px;
+    overflow: hidden;
+    transition: height ease 0.5s;
+}
+ul.tablinks-list > li.tablinks.active > span.tab-title {
+    background: #1c0a7a;
+    background-image: -webkit-linear-gradient( -169deg, #1c0a7a 0%, #4a0788 100% );
+}
+.tablinks-sub-list li.tablinks.active > .tab-title,
+.tablinks-sub-list li.tablinks > .tab-title:hover {
+    background: #323437;
+}
+ul.tablinks-list > li.tablinks.active {
+	height: auto;
+    transition: height ease 0.5s;
+}
+.igual-tab .tabcontent {
+    float: left;
+    padding: 50px;
+    width: 75%;
+    border: solid 1px #f1f1f1;
+    min-height: 552px;
+}
+.igual-tab .tab-hide {
+	display: none;
+}
+.igual-tab .customize-control-description {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #5c5b5b;
+}
+.igual-tab .customize-control-title {
+    display: block;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1;
+    color: #000;
+}
+.igual-control {
+    padding: 30px 0;
+    border-bottom: 1px solid #efefef;
+}
+.igual-control.label-control {
+    background: #F0F0F1;
+    padding: 16px 25px;
+}
+.igual-tab .tabcontent .igual-control:first-child:not(.label-control) {
+    padding-top: 0;
+}
+.igual-control:last-child {
+    margin-bottom: 0;
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+#maintenance-general-tab .igual-control {
+    border-bottom: 0;
+}
+ul.link-colors-list, ul.wp-border-list, ul.wp-dimensions-list, ul.wp-width-height-list, ul.wp-multi-check-list,
+.wp-picker-container .wp-color-result.button {
+    margin: 0;
+}
+.wp-picker-container .wp-color-result.button {
+    vertical-align: middle;
+    height: 30px;
+    border-color: #e1e1e1;
+}
+.wp-picker-container .wp-color-result.button:focus {
+    border-color: #e1e1e1;
+    outline: #e1e1e1;
+    box-shadow: none;
+}
+.wp-picker-container input[type=text].wp-color-picker {
+    height: 30px;
+}
+.wp-color-result-text {
+    height: 28px;
+    line-height: 28px;
+    font-size: 13px;
+}
+.igual-image-upload-field {
+    margin-top: 10px;
+}
+.wp-picker-input-wrap .button.wp-picker-clear {
+    height: 30px;
+}
+
+#site-typo-settings .igual-control label.customize-control-title,
+#heading-typo-settings .igual-control label.customize-control-title {
+    background: #F0F0F1;
+    padding: 16px 25px;
+    margin-bottom: 15px;
+}
+#site-typo-settings .igual-control, #heading-typo-settings .igual-control {
+    padding-top: 0;
+    padding-bottom: 50px;
+}
+#site-typo-settings .igual-control:last-child, #heading-typo-settings .igual-control:last-child {
+    padding-bottom: 0px;
+}
+/* Fields Styles */
+.igual-customizer-text-field {
+    width: 300px;
+}
+.igual-customizer-text-field, .igual-customizer-textarea-field {
+    width: 300px;
+}
+.igual-customizer-textarea-field {
+    height: 80px;
+    border-color: #e1e1e1;
+}
+input[type=text] {
+    border-color: #e1e1e1;
+    height: 44px;
+    line-height: 44px;
+}
+.igual-customizer-ajax-hid-wrap {
+    height: 0;
+    overflow: hidden;
+}
+select option.bold-font {
+    font-weight: bold;
+    margin-top: 20px;
+}
+ul.wp-fonts-fields-list {
+    display: block;
+    margin: 0 -15px;
+    margin-bottom: -6px;
+}
+ul.wp-fonts-fields-list > li > span {
+    position: absolute;
+    top: 0;
+    color: #999999;
+    font-size: 12px;
+    line-height: 1.4;
+}
+ul.wp-fonts-fields-list > li {
+    display: inline-block;
+    width: 33%;
+    position: relative;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 23px;
+    margin-bottom: 15px;
+}
+ul.wp-fonts-fields-list > li > input, ul.wp-fonts-fields-list > li > select {
+    width: 100%;
+    height: 28px;
+    border-color: #e1e1e1;
+}
+ul.wp-fonts-fields-list > li > span.wp-font-abs-units {
+    right: 33px;
+    top: 45%;
+    line-height: 25px;
+    height: 28px;
+    padding: 0 5px;
+    background: #eee;
+}
+.wp-core-ui select {
+    border-color: #e1e1e1;
+    height: 35px;
+}
+.igual-image-upload-field .img-place img.igual-bg-img {
+    max-height: 100px;
+    margin: 10px 0;
+}
+ul.wp-border-list,
+ul.wp-dimensions-list,
+ul.link-colors-list,
+ul.wp-radio-image-list,
+ul.wp-width-height-list {
+    display: block;
+}
+.wp-border-list > li,
+.wp-dimensions-list > li,
+.link-colors-list > li,
+.wp-radio-image-list > li,
+.wp-width-height-list > li {
+    display: inline-block;
+    position: relative;
+	vertical-align: top;
+    margin-bottom: 0;
+    margin-right: 10px;
+}
+.wp-picker-container .wp-color-result.button {
+    padding: 0 0 0 28px;
+}
+.wp-border-list input.wp-border-field,
+.wp-dimensions-list input.wp-dimensions-field,
+.wp-width-height-list input.wp-wh-field {
+    width: 70px;
+    display: block;
+    padding-right: 0;
+    border-color: #e1e1e1;
+    height: 28px;
+    margin-bottom: 10px;
+    min-height: 28px;
+    font-size: 14px;
+}
+.wp-border-list select {
+    height: 28px;
+}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    display: block;
+    opacity: 1;
+}
+.wp-fonts-fields input::-webkit-outer-spin-button, .wp-fonts-fields input::-webkit-inner-spin-button {
+    height: 42px;
+}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    height: 36px;
+}
+ul.wp-fonts-fields-list > li > input {
+    padding-right: 0;
+}
+span.wp-border-info, span.wp-dimensions-info, span.wp-color-info, span.wp-radio-info, span.wp-wh-info {
+    color: #7f7c7c;
+    font-size: 11px;
+    margin-left: 0px;
+    text-align: center;
+    display: block;
+    line-height: 15px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+ul.wp-radio-image-list {
+    margin-bottom: 0;
+}
+span.field-seperator {
+    display: block;
+    height: 1px;
+    border-top: solid 0px #e1e1e1;
+}
+span.field-seperator.seperator-before {
+	margin-bottom: 0px;
+}
+span.field-seperator.seperator-after {
+	margin-top: 0px;
+}
+.igual-control.label-control .customize-control-description {
+    margin-bottom: 0;
+    display: none;
+}
+.igual-image-upload-field .img-place img {
+    max-width: 30%;
+    background: #dbdbdb;
+    padding: 17px 20px;
+}
+/* Check Box Styles */
+ul.wp-multi-check-list {
+    list-style: none;
+    padding: 0;
+}
+ul.wp-multi-check-list li{
+	display: inline-block;
+    position: relative;
+	margin: 0 2px 2px 2px;
+}
+ul.wp-multi-check-list li label{
+    display: inline-block;
+    background-color: rgba(255, 255, 255, .9);
+    border: 2px solid rgba(139, 139, 139, .3);
+    color: #adadad;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin: 3px 0px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .2s;
+}
+ul.wp-multi-check-list li label {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+ul.wp-multi-check-list li input[type="checkbox"]:checked + label {
+    border: 2px solid #1bdbf8;
+    background-color: #12bbd4;
+    color: #fff;
+    transition: all .2s;
+}
+ul.wp-multi-check-list li input[type="checkbox"] {
+	display: block;
+    width: 100%;
+    height: 40px;
+    top: 6px;
+}
+ul.wp-multi-check-list li input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+}
+ul.wp-multi-check-list li input[type="checkbox"]:focus + label {
+  border: 2px solid #e9a1ff;
+}
+
+/* Radio Image Field */
+span.wp-radio-image-field {
+    display: block;
+    margin: 0 2px 2px;
+	position: relative;
+}
+ul.wp-radio-image-list li > input {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+	z-index: 1;
+}
+ul.wp-radio-image-list li input[type="radio"]:checked + span:after {
+    content: "\f15e";
+    position: absolute;
+    font-family: dashicons;
+    left: 0;
+    text-align: center;
+    right: 0;
+    margin: 0 auto;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+}
+ul.wp-radio-image-list li input[type="radio"]:checked + span:before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background: rgba(255,255,255,0.8);
+}
+ul.wp-width-height-list li > input {
+    display: block;
+}
+
+/* header */
+.igual-tab div#header-general ul.wp-radio-image-list li img,
+.igual-tab div#site-general-settings ul.wp-radio-image-list li img,
+.igual-tab div#footer-general ul.wp-radio-image-list li img,
+.igual-tab div#footer-insta ul.wp-radio-image-list li img,
+.igual-tab div#footer-widgets ul.wp-radio-image-list li img,
+.igual-tab div#copyright-section ul.wp-radio-image-list li img {
+    max-width: 120px;
+}
+
+/* Toggle Field */
+.igual-switch {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 34px;
+}
+.igual-switch input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 4px;
+    z-index: 1;
+}
+.igual-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.igual-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.igual-switch input:checked + .slider {
+  background-color: #2196F3;
+}
+.igual-switch input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+.igual-switch input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+.igual-switch .slider.round {
+  border-radius: 34px;
+}
+.igual-switch .slider.round:before {
+  border-radius: 50%;
+}
+
+/* Drag and Drop Field */
+ul.igual-dd-items {
+    display: block;
+    padding: 10px;
+    border: dashed 3px #e3e3e3;
+    background: #f7f7f7;
+}
+ul.igual-dd-items > li {
+    display: inline-block;
+    padding: 10px 16px;
+    margin: 2px;
+    background: #1c0a7a;
+    font-size: 12px;
+    color: #fff;
+    border-radius: 2px;
+	margin-bottom: 10px;
+    margin-top: 10px;
+	cursor: grab;
+}
+ul.igual-dd-items > li.ui-sortable-helper {
+	cursor: grabbing;
+}
+.igual-dd-items > li {
+    position: relative;
+}
+.igual-dd-items .drag-drop-custom-value {
+    position: absolute;
+    left: 50%;
+    top: -30px;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+}
+.igual-dd-items .drag-drop-custom-value.active {
+    opacity: 1;
+    visibility: visible;
+}
+ul.igual-dd-items > li > i {
+    display: block;
+    text-align: center;
+    margin: -16px;
+    padding: 20px;
+}
+.drag-drop-custom-value.active:after {
+    width: 0;
+    bottom: -4px;
+    left: 50%;
+    height: 0;
+    position: absolute;
+    content: "";
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #fff;
+    transform: translateX(-50%);
+}
+
+/* Background Field Styles */
+.wp-backgrounds-fields > * {
+    display: inline-block;
+    width: 30%;
+	margin-bottom: 10px;
+}
+.wp-backgrounds-fields > *.igual-image-upload-field {
+    display: block;
+    width: 100%;
+}
+.igual-control.label-control > label {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+button.option-btn-fixed {
+    position: fixed;
+    top: 50px;
+}
+/*Import/Export Styles*/
+textarea#customize-import-value-box {
+    width: 100%;
+}

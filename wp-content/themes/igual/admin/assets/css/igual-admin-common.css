@@ -1,0 +1,9 @@
+.toplevel_page_igual-welcome .wp-menu-image > img {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    opacity: 1 !important;
+    filter: grayscale(100%);
+    padding: 0 !important;
+    margin-top: 6px;
+}

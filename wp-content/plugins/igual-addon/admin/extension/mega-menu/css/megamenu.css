@@ -1,0 +1,16 @@
+/*
+ * Igual Megamenu Admin Nav Walker Styles
+ */
+ .igual-megamenu-wrap,
+ .igual-megamenu-col-wrap,
+ .igual-megamenu-widget-wrap {
+	 display: none;
+ }
+.menu-depth-0 .igual-megamenu-wrap,
+.menu-depth-1.megamenu-actived .igual-megamenu-col-wrap,
+.menu-depth-2.megamenu-actived .igual-megamenu-widget-wrap {
+	display: inline-block;
+}
+.igual-menu-icons {
+    font-family: themify;
+}

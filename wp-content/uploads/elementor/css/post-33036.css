@@ -1,0 +1,26 @@
+.elementor-33036 .elementor-element.elementor-element-621f7e8{--display:grid;--e-con-grid-template-columns:repeat(2, 1fr);--e-con-grid-template-rows:repeat(1, 1fr);--grid-auto-flow:row;}.elementor-33036 .elementor-element.elementor-element-135e88c{--display:flex;--align-items:flex-start;--container-widget-width:calc( ( 1 - var( --container-widget-flex-grow ) ) * 100% );border-style:none;--border-style:none;box-shadow:3px 5px 41px 0px rgba(2.0000000000000204, 24.00000000000012, 93.00000000000007, 0.05);--margin-top:0px;--margin-bottom:35px;--margin-left:0px;--margin-right:0px;--padding-top:35px;--padding-bottom:30px;--padding-left:30px;--padding-right:30px;}.elementor-33036 .elementor-element.elementor-element-135e88c:not(.elementor-motion-effects-element-type-background), .elementor-33036 .elementor-element.elementor-element-135e88c > .elementor-motion-effects-container > .elementor-motion-effects-layer{background-color:#FFFFFF;}.elementor-widget-image .widget-image-caption{color:var( --e-global-color-text );font-family:var( --e-global-typography-text-font-family ), Sans-serif;font-weight:var( --e-global-typography-text-font-weight );}.elementor-33036 .elementor-element.elementor-element-c09efe3{width:var( --container-widget-width, 28.696% );max-width:28.696%;--container-widget-width:28.696%;--container-widget-flex-grow:0;}.elementor-33036 .elementor-element.elementor-element-c09efe3.elementor-element{--flex-grow:0;--flex-shrink:0;}.elementor-widget-heading .elementor-heading-title{font-family:var( --e-global-typography-primary-font-family ), Sans-serif;font-weight:var( --e-global-typography-primary-font-weight );color:var( --e-global-color-primary );}.elementor-33036 .elementor-element.elementor-element-2206b7f{--e-transform-scale:1;margin:0px 0px calc(var(--kit-widget-spacing, 0px) + 0px) 0px;text-align:left;}.elementor-33036 .elementor-element.elementor-element-2206b7f .elementor-heading-title{font-family:"Marcellus", Sans-serif;font-size:30px;font-weight:400;line-height:40px;color:#262626;}.elementor-33036 .elementor-element.elementor-element-d476eb4{margin:0px 0px calc(var(--kit-widget-spacing, 0px) + 10px) 0px;}.elementor-33036 .elementor-element.elementor-element-d476eb4 .elementor-heading-title{font-family:"DM Sans", Sans-serif;font-weight:400;line-height:24px;color:#797979;}.elementor-33036 .elementor-element.elementor-element-f9196cf .cea-button .cea-align-icon-right{margin-left:11px;}.elementor-33036 .elementor-element.elementor-element-f9196cf .cea-button .cea-align-icon-left{margin-right:11px;}.elementor-33036 .elementor-element.elementor-element-f9196cf .cea-button{fill:#FFFFFF;color:#FFFFFF;background-color:#B8967E;border-radius:15px 0px 15px 0px;padding:22px 30px 21px 88px;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}.elementor-33036 .elementor-element.elementor-element-f9196cf .cea-button:hover, .elementor-33036 .elementor-element.elementor-element-f9196cf .cea-button:focus{background-color:#00192C;}@media(max-width:1024px){.elementor-33036 .elementor-element.elementor-element-621f7e8{--grid-auto-flow:row;}}@media(max-width:767px){.elementor-33036 .elementor-element.elementor-element-621f7e8{--e-con-grid-template-columns:repeat(1, 1fr);--grid-auto-flow:row;}}/* Start custom CSS for container, class: .elementor-element-135e88c */.elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:before{content: "";
+    width: 40px;
+    height: 100px;
+    position: absolute;
+    left: 93%;
+    top: 0;
+    border-bottom-left-radius: 40px;
+    transition: all .3s;}
+    .elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:before{    background: linear-gradient(to left, rgba(184, 150, 126, 0.38), rgb(58 123 213 / 0));}
+     .elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:hover:before {
+    background: linear-gradient(to left, #b8967e, rgb(58 123 213 / 0));
+    transition: all .3s;
+}/* End custom CSS */
+/* Start custom CSS for container, class: .elementor-element-135e88c */.elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:before{content: "";
+    width: 40px;
+    height: 100px;
+    position: absolute;
+    left: 93%;
+    top: 0;
+    border-bottom-left-radius: 40px;
+    transition: all .3s;}
+    .elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:before{    background: linear-gradient(to left, rgba(184, 150, 126, 0.38), rgb(58 123 213 / 0));}
+     .elementor-element.elementor-element-135e88c.e-con-full.e-flex.e-con.e-child:hover:before {
+    background: linear-gradient(to left, #b8967e, rgb(58 123 213 / 0));
+    transition: all .3s;
+}/* End custom CSS */
