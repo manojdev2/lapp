@@ -21,6 +21,23 @@ $header_class .= (isset($header_values['header_absolute']) && $header_values['he
 
 <header id="site-header" class="site-header<?php echo esc_attr($header_class); ?>">
 
+	<div data-rocket-location-hash="bc0c252c0aa75c849c70ddf5b59320b9" class="header-topbar navbar elements-2">
+		<div class="container-fluid">
+			<ul class="nav topbar-ul element-left right-element-exist">
+				<li>Mon – Fri: 9.30 am – 5.00pm</li>
+			</ul>
+			<ul class="nav topbar-ul pull-right justify-content-end right-element-exist">
+				<li><a href="mailto:info@igual.com" class="email-link" target="_self"><span
+							class="bi bi-envelope theme-color me-2"></span>revenuebar@gmail.com</a></li>
+				<li>
+					<address><span class="bi bi-geo-alt theme-color me-1"></span>Rajaji Bhavan Complex,
+						
+						Besant Nagar, Chennai - 600090.<br>
+					</address>
+				</li>
+			</ul>
+		</div><!-- .container -->
+	</div>
 	<?php
 	$header_items = $header_values['header_items'];
 
