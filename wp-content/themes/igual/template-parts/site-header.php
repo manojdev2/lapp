@@ -24,7 +24,7 @@ $header_class .= (isset($header_values['header_absolute']) && $header_values['he
 	<div data-rocket-location-hash="bc0c252c0aa75c849c70ddf5b59320b9" class="header-topbar navbar elements-2">
 		<div class="container-fluid">
 			<ul class="nav topbar-ul element-left right-element-exist">
-				<li>Mon – Fri: 9.30 am – 5.00pm</li>
+				<li>Mon – Fri: 9.30 am – 5.00 pm</li>
 			</ul>
 			<ul class="nav topbar-ul pull-right justify-content-end right-element-exist">
 				<li><a href="mailto:info@igual.com" class="email-link" target="_self"><span
