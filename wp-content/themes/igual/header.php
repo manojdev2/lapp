@@ -37,9 +37,7 @@
 
 		<div class="igual-body-inner<?php if( $layout['site_layout'] == 'boxed' ) echo esc_attr( ' container' ); ?>">
 		
-			<?php if( $pageloader_opt == '1' ) : ?>
 			<div class="page-loader"><span class="page-loader-divider"></span></div>
-			<?php endif; ?>	
 
 			<?php
 			/*
