@@ -410,6 +410,18 @@ function igual_site_footer(){
 	get_template_part( 'template-parts/site', 'footer' );
 }
 
+// Redirect logged-in users from login page to target page
+add_action( 'template_redirect', function() {
+    if ( is_user_logged_in() ) {
+        $login_page_id = 36397; 
+        $target_page_id = 25511;
+        if ( is_page( $login_page_id ) ) {
+            wp_safe_redirect( get_permalink( $target_page_id ) );
+            exit;
+        }
+    }
+});
+
 //Default exceprt length
 if( !class_exists( 'Igual_Addon' ) ){
 	add_filter( 'excerpt_length', 'igual_default_excerpt_length', 10 );
