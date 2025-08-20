@@ -723,7 +723,7 @@ function send_study_circle_post_notification($post)
                 </div>';
 
 	// Event Details
-	if ($formatted_date) {
+	if ($date) {
 		$message .= '<div class="detail-row">
                         <span class="detail-icon"> 📅 </span>
                         <span><strong>Date:</strong> ' . esc_html($formatted_date) . '</span>
