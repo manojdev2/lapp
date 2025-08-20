@@ -962,7 +962,7 @@ class Study_Circle_Widget extends WP_Widget
 		}
 
 		$query_args = array(
-			'post_type' => 'study_circle',
+			'post_type' => 'study-circle',
 			'posts_per_page' => -1,
 			'meta_key' => 'date',
 			'orderby' => 'meta_value',
