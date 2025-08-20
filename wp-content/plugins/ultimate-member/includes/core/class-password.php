@@ -419,7 +419,7 @@ if ( ! class_exists( 'um\core\Password' ) ) {
 			}
 
 			if ( empty( $user ) ) {
-				UM()->form()->add_error( 'username_b', __( 'Please provide your username or email', 'ultimate-member' ) );
+				UM()->form()->add_error( 'username_b', __( 'Please provide your email', 'ultimate-member' ) );
 			}
 
 			if ( ( ! is_email( $user ) && username_exists( $user ) ) || ( is_email( $user ) && email_exists( $user ) ) ) {

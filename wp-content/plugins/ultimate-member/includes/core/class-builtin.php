@@ -1305,10 +1305,10 @@ if ( ! class_exists( 'um\core\Builtin' ) ) {
 				),
 
 				'username_b' => array(
-					'title' => __('Username or Email','ultimate-member'),
+					'title' => __('Email','ultimate-member'),
 					'metakey' => 'username_b',
 					'type' => 'text',
-					'placeholder' => __('Enter your username or email','ultimate-member'),
+					'placeholder' => __('Enter your email','ultimate-member'),
 					'required' => 1,
 					'public' => 1,
 					'editable' => false,
