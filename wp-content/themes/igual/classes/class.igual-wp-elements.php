@@ -195,10 +195,10 @@ class Igual_Wp_Elements {
 							case "description":
 								if( $archive_subtitle ) echo '<div class="page-subtitle">'. ( $archive_subtitle ) .'</div>';
 							break;
-							case "breadcrumb":
-								$bread_out = self::igual_breadcrumbs();
-								if( $bread_out ) echo '<div class="breadcrumbs-wrap">'. $bread_out .'</div><!-- .breadcrumbs-wrap -->';
-							break;											
+							// case "breadcrumb":
+							// 	$bread_out = self::igual_breadcrumbs();
+							// 	if( $bread_out ) echo '<div class="breadcrumbs-wrap">'. $bread_out .'</div><!-- .breadcrumbs-wrap -->';
+							// break;											
 						}
 					}
 					echo'</ul>';

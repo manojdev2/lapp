@@ -482,7 +482,7 @@ function um_after_login_submit( $args ) {
 
 	<div class="um-col-alt-b">
 		<a href="<?php echo esc_url( um_get_core_page( 'password-reset' ) ); ?>" class="um-link-alt">
-			<?php _e( 'Forgot your password?', 'ultimate-member' ); ?>
+			<?php _e( 'Forgot password?', 'ultimate-member' ); ?>
 		</a>
 	</div>
 
