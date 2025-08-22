@@ -149,7 +149,7 @@ function send_simplified_cea_event_notification($post)
             
             <!-- Header -->
             <div class="header">
-                <h1>🎉 New Event Published</h1>
+                <h1> New Event Published</h1>
             </div>
             
             <!-- Content -->
@@ -171,24 +171,24 @@ function send_simplified_cea_event_notification($post)
 
 	// Event Details with corrected field access
 	if (!empty($event_details['start_date'])) {
-		$message .= '<div class="detail-row"><strong>📅 Date:</strong> ' . date('F j, Y', strtotime($event_details['start_date'])) . '</div>';
+		$message .= '<div class="detail-row"><strong> Date:</strong> ' . date('F j, Y', strtotime($event_details['start_date'])) . '</div>';
 	}
 
 	if (!empty($event_details['time'])) {
-		$message .= '<div class="detail-row"><strong>⏰ Time:</strong> ' . $event_details['time'] . '</div>';
+		$message .= '<div class="detail-row"><strong> Time:</strong> ' . $event_details['time'] . '</div>';
 	}
 
 	if (!empty($event_details['venue_name'])) {
-		$message .= '<div class="detail-row"><strong>📍 Venue:</strong> ' . $event_details['venue_name'] . '</div>';
+		$message .= '<div class="detail-row"><strong> Venue:</strong> ' . $event_details['venue_name'] . '</div>';
 	}
 
 	if (!empty($event_details['venue_address'])) {
-		$message .= '<div class="detail-row"><strong>🗺️ Address:</strong> ' . $event_details['venue_address'] . '</div>';
+		$message .= '<div class="detail-row"><strong> Address:</strong> ' . $event_details['venue_address'] . '</div>';
 	}
 
 	if (!empty($event_details['cost'])) {
 		$currency = !empty($event_details['currency_symbol']) ? $event_details['currency_symbol'] : '$';
-		$message .= '<div class="detail-row"><strong>💰 Cost:</strong> ' . $currency . $event_details['cost'] . '</div>';
+		$message .= '<div class="detail-row"><strong> Cost:</strong> ' . $currency . $event_details['cost'] . '</div>';
 	}
 
 
@@ -196,7 +196,7 @@ function send_simplified_cea_event_notification($post)
 	$excerpt = get_the_excerpt($post->ID);
 	if (!empty($excerpt)) {
 		$message .= '<div class="about-section">
-                        <h3 style="color: #2c3e50; margin: 0 0 15px 0;">📋 About This Event</h3>
+                        <h3 style="color: #2c3e50; margin: 0 0 15px 0;"> About This Event</h3>
                         <p style="margin: 0; line-height: 1.6;">' . wp_strip_all_tags($excerpt) . '</p>
                     </div>';
 	}
@@ -205,11 +205,11 @@ function send_simplified_cea_event_notification($post)
 	if (!empty($pdf_links)) {
 		$message .= '
             <div class="pdf-section" style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px;">
-                <h3 style="color: #856404; margin: 0 0 15px 0;">📄 Event Documents</h3>';
+                <h3 style="color: #856404; margin: 0 0 15px 0;"> Event Documents</h3>';
 
 		foreach ($pdf_links as $pdf) {
 			$message .= '<div style="margin: 8px 0;">
-                        📄 <strong>' . $pdf['name'] . '</strong>
+                         <strong>' . $pdf['name'] . '</strong>
                     </div>';
 		}
 
@@ -237,7 +237,7 @@ function send_simplified_cea_event_notification($post)
                                     text-transform: uppercase; 
                                     font-family: Arial, sans-serif;
                                 ">
-                                    🎫 View Event Details
+                                     View Event Details
                                 </a>
                             </td>
                         </tr>
@@ -469,7 +469,7 @@ function send_cea_post_notification($post)
             
             <!-- Header -->
             <div class="header">
-                <h1>📝 New News & Article Published</h1>
+                <h1> New News & Article Published</h1>
             </div>
             
             <!-- Content -->
@@ -492,11 +492,11 @@ function send_cea_post_notification($post)
 	// Post author
 	$author_name = get_the_author_meta('display_name', $post->post_author);
 	if (!empty($author_name)) {
-		$message .= '<div class="detail-row"><strong>👤 Author:</strong> ' . $author_name . '</div>';
+		$message .= '<div class="detail-row"><strong> Author:</strong> ' . $author_name . '</div>';
 	}
 
 	// Post Details
-	$message .= '<div class="detail-row"><strong>📅 Published:</strong> ' . get_the_date('F j, Y g:i A', $post->ID) . '</div>';
+	$message .= '<div class="detail-row"><strong> Published:</strong> ' . get_the_date('F j, Y g:i A', $post->ID) . '</div>';
 
 	// Post category
 	$categories = get_the_category($post->ID);
@@ -504,7 +504,7 @@ function send_cea_post_notification($post)
 		$category_names = array_map(function ($cat) {
 			return $cat->name;
 		}, $categories);
-		$message .= '<div class="detail-row"><strong>📂 Category:</strong> ' . implode(', ', $category_names) . '</div>';
+		$message .= '<div class="detail-row"><strong> Category:</strong> ' . implode(', ', $category_names) . '</div>';
 	}
 
 	// Post tags
@@ -513,14 +513,14 @@ function send_cea_post_notification($post)
 		$tag_names = array_map(function ($tag) {
 			return $tag->name;
 		}, $tags);
-		$message .= '<div class="detail-row"><strong>🏷️ Tags:</strong> ' . implode(', ', $tag_names) . '</div>';
+		$message .= '<div class="detail-row"><strong> Tags:</strong> ' . implode(', ', $tag_names) . '</div>';
 	}
 
 	// Post Content/Excerpt
 	$excerpt = get_the_excerpt($post->ID);
 	if (!empty($excerpt)) {
 		$message .= '<div class="about-section">
-                        <h3 style="color: #2c3e50; margin: 0 0 15px 0;">📋 News & Article Summary</h3>
+                        <h3 style="color: #2c3e50; margin: 0 0 15px 0;"> News & Article Summary</h3>
                         <p style="margin: 0; line-height: 1.6;">' . wp_strip_all_tags($excerpt) . '</p>
                     </div>';
 	}
@@ -529,11 +529,11 @@ function send_cea_post_notification($post)
 	if (!empty($pdf_links)) {
 		$message .= '
                 <div class="pdf-section" style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px;">
-                    <h3 style="color: #856404; margin: 0 0 15px 0;">📄 Post Documents</h3>';
+                    <h3 style="color: #856404; margin: 0 0 15px 0;"> Post Documents</h3>';
 
 		foreach ($pdf_links as $pdf) {
 			$message .= '<div style="margin: 8px 0;">
-                            📄 <strong>' . $pdf['name'] . '</strong>
+                             <strong>' . $pdf['name'] . '</strong>
                         </div>';
 		}
 
@@ -560,7 +560,7 @@ function send_cea_post_notification($post)
                                     text-transform: uppercase; 
                                     font-family: Arial, sans-serif;
                                 ">
-                                    📖 Read Article
+                                     Read Article
                                 </a>
                             </td>
                         </tr>
@@ -712,7 +712,7 @@ function send_study_circle_post_notification($post)
             
             <!-- Header -->
             <div class="header">
-                <h1>📚 New Study Circle Event</h1>
+                <h1>New Study Circle Event</h1>
                 <!-- <p style="margin: 10px 0 0 0; opacity: 0.9;">' . get_bloginfo('name') . '</p>-->
             </div>
             
@@ -725,27 +725,27 @@ function send_study_circle_post_notification($post)
 	// Event Details
 	if ($date) {
 		$message .= '<div class="detail-row">
-                        <span class="detail-icon"> 📅 </span>
+                        <!-- <span class="detail-icon">📅</span>-->
                         <span><strong>Date:</strong> ' . esc_html($formatted_date) . '</span>
                      </div>';
 	}
 	if ($time) {
 		$message .= '<div class="detail-row">
-                        <span class="detail-icon">🕐</span>
+                       <!-- <span class="detail-icon">🕐</span>-->
                         <span><strong>Time:</strong> ' . esc_html($time) . '</span>
                      </div>';
 	}
 
 	if ($authors) {
 		$message .= '<div class="detail-row">
-                        <span class="detail-icon">👤</span>
+                       <!-- <span class="detail-icon">👤</span>-->
                         <span><strong>Speaker(s):</strong> ' . esc_html($authors) . '</span>
                      </div>';
 	}
 
 	if ($venue_text) {
 		$message .= '<div class="detail-row">
-                        <span class="detail-icon">📍</span>
+                       <!-- <span class="detail-icon">📍</span>-->
                         <span><strong>Venue/Link:</strong> ' . $venue_text . '</span>
                      </div>';
 	}
@@ -768,7 +768,7 @@ function send_study_circle_post_notification($post)
 	$excerpt = get_the_excerpt($post->ID);
 	if (!empty($excerpt)) {
 		$message .= '<div style="margin: 25px 0; padding: 20px; background: #f6f2e8; border-radius: 8px;">
-                        <h3 style="color: #4a3d2f; margin: 0 0 15px 0;">📋 Event Summary</h3>
+                        <h3 style="color: #4a3d2f; margin: 0 0 15px 0;"> Event Summary</h3>
                         <p style="margin: 0; line-height: 1.6;">' . wp_strip_all_tags($excerpt) . '</p>
                     </div>';
 	}
@@ -776,11 +776,11 @@ function send_study_circle_post_notification($post)
 	// PDF Links Section
 	if (!empty($pdf_links)) {
 		$message .= '<div class="pdf-section">
-                        <h3 style="color: #8b7355; margin: 0 0 15px 0;">📄 Event Documents</h3>';
+                        <h3 style="color: #8b7355; margin: 0 0 15px 0;"> Event Documents</h3>';
 
 		foreach ($pdf_links as $pdf) {
 			$message .= '<div style="margin: 8px 0;">
-                            📄 <strong>' . $pdf['name'] . '</strong>
+                             <strong>' . $pdf['name'] . '</strong>
                         </div>';
 		}
 		$message .= '</div>';
@@ -790,12 +790,12 @@ function send_study_circle_post_notification($post)
                 <!-- Call to Action -->
                 <div class="button-container">
                     <a href="' . get_permalink($post->ID) . '" class="cta-button">
-                        📖 View Event Details
+                         View Event Details
                     </a>';
 
 	if ($invitation_link) {
 		$message .= '<a href="' . esc_url($invitation_link) . '" class="cta-button" target="_blank">
-                        📎 Invitation
+                        Invitation
                     </a>';
 	}
 
