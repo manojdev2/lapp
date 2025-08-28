@@ -433,3 +433,146 @@ if( !class_exists( 'Igual_Addon' ) ){
 		return $length;
 	}
 }
+
+use Razorpay\Api\Api;
+
+require_once WP_CONTENT_DIR . '/plugins/razorpay-php/Razorpay.php';
+
+add_action('wp_ajax_create_razorpay_order', 'create_razorpay_order_callback');
+add_action('wp_ajax_nopriv_create_razorpay_order', 'create_razorpay_order_callback');
+
+function create_razorpay_order_callback() {
+    if ( ! isset($_POST['amount']) || empty($_POST['amount']) ) {
+        wp_send_json_error('Amount not specified');
+    }
+
+    $amount = intval($_POST['amount']);
+
+    $key_id = 'rzp_test_RAkTALYcjrAMsc';
+    $key_secret = 'lW33gwB7nPdFurYp54jfMjUB';
+
+    $api = new Api($key_id, $key_secret);
+
+    try {
+        $order  = $api->order->create([
+            'receipt' => 'receipt_' . time(),
+            'amount' => $amount, 
+            'currency' => 'INR',
+            'payment_capture' => 1 
+        ]);
+        wp_send_json_success([ 'order_id' => $order['id'] ]);
+    } catch (Exception $e) {
+        wp_send_json_error($e->getMessage());
+    }
+}
+
+add_action('wp_footer', function () {
+    if ( is_page('event-register') ) : ?>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+        jQuery(document).ready(function($) {
+            // Add error message divs below the inputs/select
+            $('[name="name-1-first-name"]').after('<div class="rz-error" id="error-name" style="color:red; font-size:0.9em; display:none;">Please enter your name.</div>');
+            $('[name="email-1"]').after('<div class="rz-error" id="error-email" style="color:red; font-size:0.9em; display:none;">Please enter your email.</div>');
+            $('[name="phone-1"]').after('<div class="rz-error" id="error-phone" style="color:red; font-size:0.9em; display:none;">Please enter your phone number.</div>');
+            $('[name="select-5"]').after('<div class="rz-error" id="error-amount" style="color:red; font-size:0.9em; display:none;">Please select an amount.</div>');
+
+            function validateFields() {
+                var isValid = true;
+                var userName  = $('[name="name-1-first-name"]').val().trim();
+                var userEmail = $('[name="email-1"]').val().trim();
+                var userPhone = $('[name="phone-1"]').val().trim();
+                var amount    = $('[name="select-5"] option:selected').text().trim();
+
+                if (userName === '') {
+                    $('#error-name').show();
+                    isValid = false;
+                } else {
+                    $('#error-name').hide();
+                }
+
+                if (userEmail === '') {
+                    $('#error-email').show();
+                    isValid = false;
+                } else {
+                    $('#error-email').hide();
+                }
+
+                if (userPhone === '') {
+                    $('#error-phone').show();
+                    isValid = false;
+                } else {
+                    $('#error-phone').hide();
+                }
+
+                if (!amount || isNaN(amount)) {
+                    $('#error-amount').show();
+                    isValid = false;
+                } else {
+                    $('#error-amount').hide();
+                }
+
+                return isValid;
+            }
+
+            $('[name="name-1-first-name"], [name="email-1"], [name="phone-1"], [name="select-5"]').on('input change', function() {
+                validateFields();
+            });
+			$(document).on('click', '#rzp-button', function(e) {
+    e.preventDefault();
+    if (!validateFields()) {
+        return;
+    }
+
+    var userName  = $('[name="name-1-first-name"]').val().trim();
+    var userEmail = $('[name="email-1"]').val().trim();
+    var userPhone = $('[name="phone-1"]').val().trim();
+    var amountVal = $('[name="select-5"] option:selected').text().trim();
+    var razorpayAmount = parseInt(amountVal, 10) * 100;
+
+    $.ajax({
+        url: '<?php echo admin_url("admin-ajax.php"); ?>',
+        type: 'POST',
+        data: {
+            action: 'create_razorpay_order',
+            amount: razorpayAmount,
+        },
+        success: function(response) {
+            if (response.success && response.data.order_id) {
+                var options = {
+                    "key": "rzp_test_RAkTALYcjrAMsc",
+                    "amount": razorpayAmount.toString(),
+                    "currency": "INR",
+                    "name": "Event Registration",
+                    "description": "Pay to register",
+                    "order_id": response.data.order_id,
+                    "handler": function(response){
+                        $('[name="text-1"]').val(response.razorpay_payment_id);
+						$('[name="text-2"]').val(response.razorpay_order_id);
+                        $(".forminator-button-submit").trigger("click");
+                    },
+                    "prefill": {
+                        "name": userName,
+                        "email": userEmail,
+                        "contact": userPhone
+                    },
+                    "theme": {
+                        "color": "#3399cc"
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+            } else {
+                alert('Unable to create payment order. Please try again.');
+            }
+        },
+        error: function() {
+            alert('AJAX error creating payment order.');
+        }
+    });
+});
+
+        });
+        </script>
+    <?php endif;
+});
