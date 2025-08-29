@@ -468,6 +468,28 @@ function create_razorpay_order_callback() {
 
 add_action('wp_footer', function () {
     if ( is_page('event-register') ) : ?>
+<style>
+.rzp-btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+.rzp-btn-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #eee;
+    border-top: 2px solid #3399cc;
+    border-radius: 50%;
+    animation: rzp-spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+@keyframes rzp-spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+</style>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
         jQuery(document).ready(function($) {
@@ -483,95 +505,77 @@ add_action('wp_footer', function () {
                 var userEmail = $('[name="email-1"]').val().trim();
                 var userPhone = $('[name="phone-1"]').val().trim();
                 var amount    = $('[name="select-5"] option:selected').text().trim();
-
-                if (userName === '') {
-                    $('#error-name').show();
-                    isValid = false;
-                } else {
-                    $('#error-name').hide();
-                }
-
-                if (userEmail === '') {
-                    $('#error-email').show();
-                    isValid = false;
-                } else {
-                    $('#error-email').hide();
-                }
-
-                if (userPhone === '') {
-                    $('#error-phone').show();
-                    isValid = false;
-                } else {
-                    $('#error-phone').hide();
-                }
-
-                if (!amount || isNaN(amount)) {
-                    $('#error-amount').show();
-                    isValid = false;
-                } else {
-                    $('#error-amount').hide();
-                }
-
+                if (userName === '') { $('#error-name').show(); isValid = false; } else { $('#error-name').hide(); }
+                if (userEmail === '') { $('#error-email').show(); isValid = false; } else { $('#error-email').hide(); }
+                if (userPhone === '') { $('#error-phone').show(); isValid = false; } else { $('#error-phone').hide(); }
+                if (!amount || isNaN(amount)) { $('#error-amount').show(); isValid = false; } else { $('#error-amount').hide(); }
                 return isValid;
             }
 
             $('[name="name-1-first-name"], [name="email-1"], [name="phone-1"], [name="select-5"]').on('input change', function() {
                 validateFields();
             });
-			$(document).on('click', '#rzp-button', function(e) {
-    e.preventDefault();
-    if (!validateFields()) {
-        return;
-    }
 
-    var userName  = $('[name="name-1-first-name"]').val().trim();
-    var userEmail = $('[name="email-1"]').val().trim();
-    var userPhone = $('[name="phone-1"]').val().trim();
-    var amountVal = $('[name="select-5"] option:selected').text().trim();
-    var razorpayAmount = parseInt(amountVal, 10) * 100;
+            $(document).on('click', '#rzp-button', function(e) {
+                e.preventDefault();
+                if (!validateFields()) return;
 
-    $.ajax({
-        url: '<?php echo admin_url("admin-ajax.php"); ?>',
-        type: 'POST',
-        data: {
-            action: 'create_razorpay_order',
-            amount: razorpayAmount,
-        },
-        success: function(response) {
-            if (response.success && response.data.order_id) {
-                var options = {
-                    "key": "rzp_test_RAkTALYcjrAMsc",
-                    "amount": razorpayAmount.toString(),
-                    "currency": "INR",
-                    "name": "Event Registration",
-                    "description": "Pay to register",
-                    "order_id": response.data.order_id,
-                    "handler": function(response){
-                        $('[name="text-1"]').val(response.razorpay_payment_id);
-						$('[name="text-2"]').val(response.razorpay_order_id);
-                        $(".forminator-button-submit").trigger("click");
+                  var $btn = $(this);
+    // Store original HTML for later restore
+    var originalHtml = $btn.html();
+
+    // Set loading state: text + spinner, and disable button
+    $btn.addClass('rzp-btn-loading').prop('disabled', true)
+        .html('Processing<span class="rzp-btn-spinner"></span>');
+
+                var userName  = $('[name="name-1-first-name"]').val().trim();
+                var userEmail = $('[name="email-1"]').val().trim();
+                var userPhone = $('[name="phone-1"]').val().trim();
+                var amountVal = $('[name="select-5"] option:selected').text().trim();
+                var razorpayAmount = parseInt(amountVal, 10) * 100;
+
+                $.ajax({
+                    url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'create_razorpay_order',
+                        amount: razorpayAmount
                     },
-                    "prefill": {
-                        "name": userName,
-                        "email": userEmail,
-                        "contact": userPhone
-                    },
-                    "theme": {
-                        "color": "#3399cc"
-                    }
-                };
-                var rzp1 = new Razorpay(options);
-                rzp1.open();
-            } else {
+                    success: function(response) {
+                        if (response.success && response.data.order_id) {
+                            var options = {
+                                "key": "rzp_test_RAkTALYcjrAMsc",
+                                "amount": razorpayAmount.toString(),
+                                "currency": "INR",
+                                "name": "Event Registration",
+                                "description": "Pay to register",
+                                "order_id": response.data.order_id,
+                                "handler": function(response){
+                                    $('[name="text-1"]').val(response.razorpay_payment_id);
+                                    $('[name="text-2"]').val(response.razorpay_order_id);
+                                    $(".forminator-button-submit").trigger("click");
+                                },
+                                "prefill": {
+                                    "name": userName,
+                                    "email": userEmail,
+                                    "contact": userPhone
+                                },
+                                "theme": { "color": "#3399cc" }
+                            };
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            var rzp1 = new Razorpay(options);
+                            rzp1.open();
+                        } else {
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
                 alert('Unable to create payment order. Please try again.');
-            }
-        },
-        error: function() {
+                        }
+                    },
+                    error: function() {
+                        $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
             alert('AJAX error creating payment order.');
-        }
-    });
-});
-
+                    }
+                });
+            });
         });
         </script>
     <?php endif;
