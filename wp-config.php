@@ -28,10 +28,10 @@ define('DB_NAME', 'railway');
 define('DB_USER', 'root');
 
 /** Database password */
-define('DB_PASSWORD', 'PhWbqymObTVfujpubVbAuoqwYkruBxui');
+define('DB_PASSWORD', 'YDjlgeUWCisinTjjRWgsPbaBTHCuYQpZ');
 
 /** Database hostname (include port) */
-define('DB_HOST', 'ballast.proxy.rlwy.net:28065');
+define('DB_HOST', 'switchyard.proxy.rlwy.net:10602');
 
 /** Database charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
