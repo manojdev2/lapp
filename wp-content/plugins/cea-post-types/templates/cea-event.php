@@ -111,6 +111,17 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
 
     $contact        = get_post_meta(get_the_ID(), 'cea_event_contact_form', true);
 
+if (isset($_GET['cea-event'])) {
+    $cea_event = sanitize_text_field($_GET['cea-event']);
+    setcookie('cea_event', $cea_event, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
+} else {
+    $cea_event = isset($_COOKIE['cea_event']) ? sanitize_text_field($_COOKIE['cea_event']) : '';
+}
+
+function cea_event_slug_to_label($slug) {
+    return ucwords(str_replace('-', ' ', $slug));
+}
+
 global $wpdb;
 $current_user = wp_get_current_user();
 $registration_email = $current_user->user_email;
@@ -118,27 +129,30 @@ $registration_email = $current_user->user_email;
 $user_entry = false;
 $is_approved = false;
 
-if (!empty($registration_email)) {
-$user_entry = $wpdb->get_row(
-    $wpdb->prepare(
-        "SELECT e.entry_id
-         FROM {$wpdb->prefix}frmt_form_entry_meta m
-         INNER JOIN {$wpdb->prefix}frmt_form_entry e ON m.entry_id = e.entry_id
-         WHERE m.meta_key = 'email-1' AND m.meta_value = %s",
-        $registration_email
-    )
-);
+if (!empty($registration_email) && !empty($cea_event)) {
+    $event_label = cea_event_slug_to_label($cea_event);
+
+    $user_entry = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT e.entry_id
+             FROM {$wpdb->prefix}frmt_form_entry e
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
+             WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
+               AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s
+             LIMIT 1",
+            $registration_email,
+            strtolower(trim($event_label))
+        )
+    );
+
     if ($current_user->ID) {
         $account_status = get_user_meta($current_user->ID, 'account_status', true);
         $is_approved = ($account_status === 'approved' || $account_status === 'yes');
     }
 }
+
     ?>
-    <script>
-    console.log("registration_email: <?php echo esc_js($registration_email); ?>");
-    console.log("user_entry: <?php echo esc_js(json_encode($user_entry)); ?>");
-    console.log("is_approved: <?php echo esc_js($is_approved ? 'true' : 'false'); ?>");
-    </script>
     <?php
 
     foreach ($event_elements as $elem => $val):

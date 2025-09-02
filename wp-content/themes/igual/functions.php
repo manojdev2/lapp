@@ -434,6 +434,108 @@ if( !class_exists( 'Igual_Addon' ) ){
 	}
 }
 
+function display_dynamic_event_heading() {
+    if (is_page('event-register')) {
+        if (isset($_COOKIE['cea_event'])) {
+            $event_slug = sanitize_text_field($_COOKIE['cea_event']);
+            if (!empty($event_slug)) {
+                return '
+                    <div style="text-align:center; margin-bottom:1.5em; color:#3c332b;">
+                        <span 
+                            style="
+                                display:inline-block;
+                                background:#b3916e;
+                                color:#ffffff !important;
+                                border-radius:50%;
+                                width:50px;
+                                height:50px;
+                                line-height:50px;
+                                font-size:26px;
+                                font-weight:700;
+                                margin: 0 auto 0.5em;
+                                user-select:none;
+                            "
+                            aria-hidden="true"
+                        >
+                            <i class="fa fa-user" style="vertical-align:middle;"></i>
+                        </span>
+                        <div style="font-size:1.5em;font-weight:600;color: white;font-family:Source Sans Pro;">
+                            ' . ucwords(str_replace('-', ' ', $event_slug)) . ' Registration
+                        </div>
+                    </div>
+                ';
+            }
+        }
+        return '
+            <div style="text-align:center; margin-bottom:1.5em; color:#3c332b;">
+                <span 
+                    style="
+                        display:inline-block;
+                        background:#b3916e;
+                        color:#ffffff;
+                        border-radius:50%;
+                        width:50px;
+                        height:50px;
+                        line-height:50px;
+                        font-size:26px;
+                        font-weight:700;
+                        margin: 0 auto 0.5em;
+                        user-select:none;
+                    "
+                    aria-hidden="true"
+                >
+                    <i class="fa fa-user" style="vertical-align:middle;"></i>
+                </span>
+                <div style="font-size:1.5em; font-weight:600;">
+                    Event Register
+                </div>
+            </div>
+        ';
+    }
+    return '';
+}
+add_shortcode('event_heading', 'display_dynamic_event_heading');
+
+function enqueue_event_type_autofill_script() {
+    if (is_page('event-register')) {
+        $custom_js = <<<JS
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return '';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var ceaEvent = getCookie('cea_event');
+            if (!ceaEvent) return;
+
+            ceaEvent = ceaEvent.replace(/-/g, ' ');
+            ceaEvent = ceaEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
+
+            
+            var container = document.querySelector('.event-type-autofill');
+            if (container) {
+                var input = container.querySelector('input[type="text"], input[type="hidden"], input[type="email"], input[type="search"]');
+                if (input) {
+                    input.value = ceaEvent;
+                    input.setAttribute('readonly', 'readonly');
+                    input.style.background = "#f4e9dc"; 
+                    input.style.color = "#222"; 
+                    input.style.cursor = "not-allowed";
+                }
+            }
+        });
+JS;
+
+        wp_register_script('custom-event-type-autofill', false);
+        wp_enqueue_script('custom-event-type-autofill');
+        wp_add_inline_script('custom-event-type-autofill', $custom_js);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_event_type_autofill_script');
+
+
 use Razorpay\Api\Api;
 
 require_once WP_CONTENT_DIR . '/plugins/razorpay-php/Razorpay.php';
@@ -466,115 +568,281 @@ function create_razorpay_order_callback() {
     }
 }
 
+add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
+add_action('wp_ajax_nopriv_check_user_registration', 'handle_check_user_registration');
+function handle_check_user_registration() {
+    global $wpdb;
+
+    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+    $event_slug = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : '';
+
+    if (empty($email) || empty($event_slug)) {
+        wp_send_json_error(['message' => 'Missing parameters']);
+        wp_die();
+    }
+    $event_label = strtolower(trim(ucwords(str_replace('-', ' ', $event_slug))));
+    error_log("Checking email: $email; Event: $event_slug; Converted label: $event_label");
+
+    $entry_exists = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*)
+             FROM {$wpdb->prefix}frmt_form_entry e
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
+             WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
+               AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s",
+            $email,
+            $event_label
+        )
+    );
+
+    if ($entry_exists) {
+        wp_send_json_success(['registered' => true]);
+    } else {
+        wp_send_json_success(['registered' => false]);
+    }
+
+    wp_die();
+}
+
 add_action('wp_footer', function () {
-    if ( is_page('event-register') ) : ?>
-<style>
-.rzp-btn-loading {
-    position: relative;
-    pointer-events: none;
-    opacity: 0.6;
-}
-.rzp-btn-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #eee;
-    border-top: 2px solid #3399cc;
-    border-radius: 50%;
-    animation: rzp-spin 0.8s linear infinite;
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 10px;
-}
-@keyframes rzp-spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-}
-</style>
+    if (is_page('event-register')) : ?>
+        <style>
+            .rzp-btn-loading {
+                position: relative;
+                pointer-events: none;
+                opacity: 0.6;
+            }
+            .rzp-btn-spinner {
+                width: 20px;
+                height: 20px;
+                border: 2px solid #eee;
+                border-top: 2px solid #3399cc;
+                border-radius: 50%;
+                animation: rzp-spin 0.8s linear infinite;
+                display: inline-block;
+                vertical-align: middle;
+                margin-left: 10px;
+            }
+            @keyframes rzp-spin {
+                0% { transform: rotate(0deg);}
+                100% { transform: rotate(360deg);}
+            }
+            .rz-error {
+                color: red;
+                font-size: 0.9em;
+                display: none;
+                margin-top: 2px;
+            }
+        </style>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
         jQuery(document).ready(function($) {
-            // Add error message divs below the inputs/select
-            $('[name="name-1-first-name"]').after('<div class="rz-error" id="error-name" style="color:red; font-size:0.9em; display:none;">Please enter your name.</div>');
-            $('[name="email-1"]').after('<div class="rz-error" id="error-email" style="color:red; font-size:0.9em; display:none;">Please enter your email.</div>');
-            $('[name="phone-1"]').after('<div class="rz-error" id="error-phone" style="color:red; font-size:0.9em; display:none;">Please enter your phone number.</div>');
-            $('[name="select-5"]').after('<div class="rz-error" id="error-amount" style="color:red; font-size:0.9em; display:none;">Please select an amount.</div>');
+            function addErrorDivs() {
+                if ($('#error-name').length === 0)
+                    $('[name="name-1-first-name"]').after('<div class="rz-error" id="error-name">Please enter your name.</div>');
+                if ($('#error-email').length === 0)
+                    $('[name="email-1"]').after('<div class="rz-error" id="error-email">Please enter a valid email address.</div>');
+                if ($('#error-phone').length === 0)
+                    $('[name="phone-1"]').after('<div class="rz-error" id="error-phone">Please enter a valid phone number</div>');
+                if ($('#error-amount').length === 0)
+                    $('[name="select-5"]').after('<div class="rz-error" id="error-amount">Please select an amount.</div>');
+                if ($('#error-city').length === 0)
+                    $('[name="address-1-city"]').after('<div class="rz-error" id="error-city">Please enter your city.</div>');
+            }
+            addErrorDivs();
+function showCustomPopup(message) {
+    // Create the modal HTML
+    var modalHtml = `
+    <div id="custom-popup-overlay" style="
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;">
+      <div style="
+          background: white;
+          padding: 20px 30px;
+          border-radius: 8px;
+          max-width: 400px;
+          text-align: center;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          font-family: Arial, sans-serif;">
+        <p style="margin-bottom: 20px; font-size: 1.1em;">${message}</p>
+        <button id="custom-popup-ok" style="
+            background-color: #b48d64;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          ">OK</button>
+      </div>
+    </div>`;
 
-            function validateFields() {
-                var isValid = true;
-                var userName  = $('[name="name-1-first-name"]').val().trim();
-                var userEmail = $('[name="email-1"]').val().trim();
-                var userPhone = $('[name="phone-1"]').val().trim();
-                var amount    = $('[name="select-5"] option:selected').text().trim();
-                if (userName === '') { $('#error-name').show(); isValid = false; } else { $('#error-name').hide(); }
-                if (userEmail === '') { $('#error-email').show(); isValid = false; } else { $('#error-email').hide(); }
-                if (userPhone === '') { $('#error-phone').show(); isValid = false; } else { $('#error-phone').hide(); }
-                if (!amount || isNaN(amount)) { $('#error-amount').show(); isValid = false; } else { $('#error-amount').hide(); }
-                return isValid;
+    // Append modal to body
+    $('body').append(modalHtml);
+
+    // Bind click event to remove the modal
+    $('#custom-popup-ok').on('click', function() {
+        $('#custom-popup-overlay').fadeOut(200, function() {
+            $(this).remove();
+        });
+    });
+}
+            var fields = [
+                {name:'name-1-first-name', err:'#error-name'},
+                {name:'email-1', err:'#error-email'},
+                {name:'phone-1', err:'#error-phone'},
+                {name:'address-1-city', err:'#error-city'},
+                {name:'select-5', err:'#error-amount'}
+            ];
+
+            fields.forEach(function(field){
+                $('[name="'+field.name+'"]').data('touched', false);
+                $('[name="'+field.name+'"]').on('blur change', function() {
+                    $(this).data('touched', true);
+                    validateField(field.name, field.err);
+                });
+                $('[name="'+field.name+'"]').on('input', function(){
+                    if ($(this).data('touched')) {
+                        validateField(field.name, field.err);
+                    }
+                });
+            });
+
+            function validateField(fieldName, errorSelector) {
+                var val = $('[name="'+fieldName+'"]').val().trim();
+                var valid = true;
+                if (fieldName === 'name-1-first-name') {
+                    valid = val !== '';
+                } else if (fieldName === 'email-1') {
+                    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    valid = val !== '' && emailPattern.test(val);
+                } else if (fieldName === 'phone-1') {
+                    var phonePattern = /^[1-9]\d{9}$/; // 10 digits, does not start with 0
+                    valid = val !== '' && phonePattern.test(val);
+                } else if (fieldName === 'address-1-city') {
+                    valid = val !== '';
+                } else if (fieldName === 'select-5') {
+                    var amount = $('[name="select-5"] option:selected').text().trim();
+                    valid = amount !== '' && !isNaN(amount);
+                }
+                if (!valid) {
+                    $(errorSelector).show();
+                } else {
+                    $(errorSelector).hide();
+                }
+                return valid;
             }
 
-            $('[name="name-1-first-name"], [name="email-1"], [name="phone-1"], [name="select-5"]').on('input change', function() {
-                validateFields();
-            });
+            function getCookie(name) {
+                var value = "; " + document.cookie;
+                var parts = value.split("; " + name + "=");
+                if (parts.length === 2) return parts.pop().split(";").shift();
+                return '';
+            }
 
             $(document).on('click', '#rzp-button', function(e) {
                 e.preventDefault();
-                if (!validateFields()) return;
+                var allValid = true;
+                fields.forEach(function(field){
+                    $('[name="'+field.name+'"]').data('touched', true);
+                    if(!validateField(field.name, field.err)){
+                        allValid = false;
+                    }
+                });
+                if (!allValid) return;
 
-                  var $btn = $(this);
-    // Store original HTML for later restore
-    var originalHtml = $btn.html();
+                var $btn = $(this);
+                var originalHtml = $btn.html();
 
-    // Set loading state: text + spinner, and disable button
-    $btn.addClass('rzp-btn-loading').prop('disabled', true)
-        .html('Processing<span class="rzp-btn-spinner"></span>');
-
-                var userName  = $('[name="name-1-first-name"]').val().trim();
+                var userName = $('[name="name-1-first-name"]').val().trim();
                 var userEmail = $('[name="email-1"]').val().trim();
                 var userPhone = $('[name="phone-1"]').val().trim();
                 var amountVal = $('[name="select-5"] option:selected').text().trim();
                 var razorpayAmount = parseInt(amountVal, 10) * 100;
+                var eventSlug = getCookie('cea_event');
 
+                if (!userEmail || !eventSlug) {
+                    alert('Email or event information missing.');
+                    return;
+                }
+
+                $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
+
+                // Check if user already registered
                 $.ajax({
                     url: '<?php echo admin_url("admin-ajax.php"); ?>',
                     type: 'POST',
                     data: {
-                        action: 'create_razorpay_order',
-                        amount: razorpayAmount
+                        action: 'check_user_registration',
+                        email: userEmail,
+                        event: eventSlug
                     },
                     success: function(response) {
-                        if (response.success && response.data.order_id) {
-                            var options = {
-                                "key": "rzp_test_RAkTALYcjrAMsc",
-                                "amount": razorpayAmount.toString(),
-                                "currency": "INR",
-                                "name": "Event Registration",
-                                "description": "Pay to register",
-                                "order_id": response.data.order_id,
-                                "handler": function(response){
-                                    $('[name="text-1"]').val(response.razorpay_payment_id);
-                                    $('[name="text-2"]').val(response.razorpay_order_id);
-                                    $(".forminator-button-submit").trigger("click");
-                                },
-                                "prefill": {
-                                    "name": userName,
-                                    "email": userEmail,
-                                    "contact": userPhone
-                                },
-                                "theme": { "color": "#3399cc" }
-                            };
+                        if (response.success && response.data && response.data.registered) {
+                            showCustomPopup('You are already registered for this event.');
                             $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
-                            var rzp1 = new Razorpay(options);
-                            rzp1.open();
-                        } else {
-                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
-                alert('Unable to create payment order. Please try again.');
+                            return;
                         }
+                        startRazorpay();
                     },
                     error: function() {
+                        showCustomPopup('Could not verify registration. Please try again.');
                         $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
-            alert('AJAX error creating payment order.');
                     }
                 });
+
+                function startRazorpay() {
+                    $btn.html('Processing<span class="rzp-btn-spinner"></span>');
+
+                    $.ajax({
+                        url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'create_razorpay_order',
+                            amount: razorpayAmount
+                        },
+                        success: function(response) {
+                            if (response.success && response.data.order_id) {
+                                var options = {
+                                    key: "rzp_test_RAkTALYcjrAMsc",
+                                    amount: razorpayAmount.toString(),
+                                    currency: "INR",
+                                    name: "Event Registration",
+                                    description: "Pay to register",
+                                    order_id: response.data.order_id,
+                                    handler: function (response) {
+                                        $('[name="text-1"]').val(response.razorpay_payment_id);
+                                        $('[name="text-2"]').val(response.razorpay_order_id);
+                                        $(".forminator-button-submit").trigger("click");
+                                    },
+                                    prefill: {
+                                        name: userName,
+                                        email: userEmail,
+                                        contact: userPhone
+                                    },
+                                    theme: { "color": "#b48d64" }
+                                };
+                                $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                                var rzp1 = new Razorpay(options);
+                                rzp1.open();
+                            } else {
+                                $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                                alert('Unable to create payment order. Please try again.');
+                            }
+                        },
+                        error: function () {
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            alert('AJAX error creating payment order.');
+                        }
+                    });
+                }
             });
         });
         </script>
