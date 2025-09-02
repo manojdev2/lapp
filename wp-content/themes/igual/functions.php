@@ -3,6 +3,7 @@
  * Igual functions and definitions
  */
  
+
 define('IGUAL_DIR', get_template_directory() );
 define('IGUAL_URI', get_template_directory_uri() );
 
@@ -228,6 +229,7 @@ function igual_register_scripts() {
 
 
 }
+
 add_action( 'wp_enqueue_scripts', 'igual_register_scripts' );
 
 /**
@@ -410,7 +412,6 @@ function igual_site_footer(){
 	get_template_part( 'template-parts/site', 'footer' );
 }
 
-// Redirect logged-in users from login page to target page
 add_action( 'template_redirect', function() {
     if ( is_user_logged_in() ) {
         $login_page_id = 39180; 
@@ -422,7 +423,17 @@ add_action( 'template_redirect', function() {
     }
 });
 
-//Default exceprt length
+add_filter( 'um_password_reset_form_primary_btn_classes', function( $classes, $args ) {
+    return array();
+}, 10, 2 );
+
+add_filter( 'um_content_restriction_post_types', function( $post_types ) {
+    if ( isset( $post_types['cea-event'] ) ) {
+        unset( $post_types['cea-event'] );
+    }
+    return $post_types;
+});
+
 if( !class_exists( 'Igual_Addon' ) ){
 	add_filter( 'excerpt_length', 'igual_default_excerpt_length', 10 );
 	function igual_default_excerpt_length( $length ){
@@ -499,6 +510,7 @@ add_shortcode('event_heading', 'display_dynamic_event_heading');
 function enqueue_event_type_autofill_script() {
     if (is_page('event-register')) {
         $custom_js = <<<JS
+        // Helper to get cookie value by name
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
@@ -510,18 +522,19 @@ function enqueue_event_type_autofill_script() {
             var ceaEvent = getCookie('cea_event');
             if (!ceaEvent) return;
 
+            // Convert slug back to readable label (e.g. "rba-60-celebration" -> "Rba 60 Celebration")
             ceaEvent = ceaEvent.replace(/-/g, ' ');
             ceaEvent = ceaEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
 
-            
+            // Find the input field by class. Forminator adds class to container, so search for input inside
             var container = document.querySelector('.event-type-autofill');
             if (container) {
                 var input = container.querySelector('input[type="text"], input[type="hidden"], input[type="email"], input[type="search"]');
                 if (input) {
                     input.value = ceaEvent;
-                    input.setAttribute('readonly', 'readonly');
-                    input.style.background = "#f4e9dc"; 
-                    input.style.color = "#222"; 
+                    input.setAttribute('readonly', 'readonly'); // Use readonly so it submits the value but is not editable
+                    input.style.background = "#f4e9dc"; // Slight background for disabled look, adjust as needed
+                    input.style.color = "#222"; // Adjust text color if needed
                     input.style.cursor = "not-allowed";
                 }
             }
@@ -535,7 +548,7 @@ JS;
 }
 add_action('wp_enqueue_scripts', 'enqueue_event_type_autofill_script');
 
-
+// Razorpay Integration for Order Id creation
 use Razorpay\Api\Api;
 
 require_once WP_CONTENT_DIR . '/plugins/razorpay-php/Razorpay.php';
@@ -568,6 +581,87 @@ function create_razorpay_order_callback() {
     }
 }
 
+
+add_action('wp_ajax_get_user_data', 'get_user_data_callback');
+add_action('wp_ajax_nopriv_get_user_data', 'get_user_data_callback');
+function get_user_data_callback() {
+    if (empty($_POST['user_id'])) {
+        wp_send_json_error('User ID not specified');
+    }
+    $user_id = intval($_POST['user_id']);
+
+    $user_info = get_userdata($user_id);
+    if (!$user_info) {
+        wp_send_json_error('Invalid user ID');
+    }
+
+    $name = $user_info->display_name;
+    $email = $user_info->user_email;
+
+    $phone = get_user_meta($user_id, 'phone_number', true);
+    if (empty($phone)) {
+        $phone = get_user_meta($user_id, 'billing_phone', true);
+    }
+    if (empty($phone)) {
+        $serialized_data = get_user_meta($user_id, 'custom_serialized_meta_key', true);
+        $user_data = maybe_unserialize($serialized_data);
+
+        if (is_array($user_data) && !empty($user_data['phone_number'])) {
+            $phone = $user_data['phone_number'];
+        }
+    }
+    if (empty($phone)) {
+        $phone = '';
+    }
+
+    if (!isset($name) && !empty($user_data['first_name'])) {
+        $name = $user_data['first_name'];
+    }
+
+    wp_send_json_success([
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+    ]);
+}
+
+add_action('wp_ajax_activate_user_after_payment', 'activate_user_after_payment_callback');
+add_action('wp_ajax_nopriv_activate_user_after_payment', 'activate_user_after_payment_callback');
+
+function activate_user_after_payment_callback() {
+    if (empty($_POST['user_id']) || empty($_POST['razorpay_payment_id']) || empty($_POST['razorpay_order_id']) || empty($_POST['amount'])) {
+        wp_send_json_error('Missing required data');
+    }
+
+    $user_id = intval($_POST['user_id']);
+    $payment_id = sanitize_text_field($_POST['razorpay_payment_id']);
+    $order_id = sanitize_text_field($_POST['razorpay_order_id']);
+    $amount = intval($_POST['amount']);
+
+    update_user_meta($user_id, 'razorpay_payment_id', $payment_id);
+    update_user_meta($user_id, 'razorpay_order_id', $order_id);
+
+    $role = '';
+    if ($amount === 200) {
+        $role = 'um_one_time_member';
+    } elseif ($amount === 10000) {
+        $role = 'um_life_time_member';
+    }
+
+    if ($role) {
+        $user = new WP_User($user_id);
+        foreach ($user->roles as $existing_role) {
+            $user->remove_role($existing_role);
+        }
+        $user->add_role($role);
+    }
+    if (function_exists('UM')) {
+        UM()->common()->users()->approve($user_id, true);
+    }
+
+    wp_send_json_success('User activated, role assigned, and payment info saved.');
+}
+
 add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
 add_action('wp_ajax_nopriv_check_user_registration', 'handle_check_user_registration');
 function handle_check_user_registration() {
@@ -580,7 +674,11 @@ function handle_check_user_registration() {
         wp_send_json_error(['message' => 'Missing parameters']);
         wp_die();
     }
+
+    // Convert slug to label, lowercase and trim for consistency
     $event_label = strtolower(trim(ucwords(str_replace('-', ' ', $event_slug))));
+
+    // Log for debugging (check PHP error log)
     error_log("Checking email: $email; Event: $event_slug; Converted label: $event_label");
 
     $entry_exists = $wpdb->get_var(
@@ -846,5 +944,232 @@ function showCustomPopup(message) {
             });
         });
         </script>
+    <?php endif;
+});
+
+
+
+add_action('wp_footer', function () {
+    if ( is_page('pricing-table') ) : ?>
+    <style>
+    .rzp-btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    .rzp-btn-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #eee;
+        border-top: 2px solid #3399cc;
+        border-radius: 50%;
+        animation: rzp-spin 0.8s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 10px;
+    }
+    @keyframes rzp-spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+    </style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+    jQuery(document).ready(function($) {
+        // Append loader overlay if not exists
+        if ($('#ajaxLoader').length === 0) {
+            $('body').append(`
+                <div id="ajaxLoader" style="
+                    display:none;
+                    position: fixed;
+                    top:0; left:0; right:0; bottom:0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 99999;
+                    justify-content: center;
+                    align-items: center;
+                    display: flex;
+                ">
+                    <div style="
+                        width: 60px;
+                        height: 60px;
+                        border: 6px solid #ddd;
+                        border-top: 6px solid #3399cc;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                    "></div>
+                </div>
+            `);
+        }
+
+        $('<style>').prop('type', 'text/css').html(`
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `).appendTo('head');
+		$('#ajaxLoader').hide();
+        var ajaxUrl = '<?php echo admin_url("admin-ajax.php"); ?>';
+        var userId = <?php echo intval($_GET['user_id'] ?? 0); ?>;
+        if (!userId) {
+            console.warn('User ID missing in URL parameters');
+        }
+
+        function getUserData(userId) {
+            return $.ajax({
+                url: ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'get_user_data',
+                    user_id: userId
+                }
+            });
+        }
+
+        function startPayment(amount) {
+            if (!userId) {
+                alert('User ID missing');
+                return;
+            }
+
+            var $btn = $('#pay' + amount);
+            var originalHtml = $btn.html();
+            var razorpayAmount = parseInt(amount, 10) * 100;
+
+            $btn.addClass('rzp-btn-loading').prop('disabled', true)
+                .html('Processing<span class="rzp-btn-spinner"></span>');
+
+            getUserData(userId).done(function(userResponse) {
+                if (!userResponse.success) {
+                    alert('Could not fetch user data.');
+                    $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                    return;
+                }
+                var userData = userResponse.data;
+
+                $.ajax({
+                    url: ajaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'create_razorpay_order',
+                        amount: razorpayAmount,
+                        user_id: userId
+                    },
+                    success: function(orderResponse) {
+                        if (orderResponse.success && orderResponse.data.order_id) {
+                            var options = {
+                                key: "rzp_test_RAkTALYcjrAMsc",
+                                amount: razorpayAmount.toString(),
+                                currency: "INR",
+                                name: userData.name,
+                                order_id: orderResponse.data.order_id,
+                                handler: function(response) {
+                                    // Show loader during activation AJAX
+                                    $('#ajaxLoader').show();
+
+                                    $.ajax({
+                                        url: ajaxUrl,
+                                        type: 'POST',
+                                        data: {
+                                            action: 'activate_user_after_payment',
+                                            user_id: userId,
+                                            razorpay_payment_id: response.razorpay_payment_id,
+                                            razorpay_order_id: response.razorpay_order_id,
+                                            amount: parseInt(razorpayAmount / 100)
+                                        },
+                                        success: function(activateResponse) {
+                                            $('#ajaxLoader').hide();
+
+                                            if (activateResponse.success) {
+                                                if ($('#activationModal').length === 0) {
+                                                    $('body').append(`
+                                                        <div id="activationModal" style="
+                                                            position: fixed;
+                                                            top: 0; left: 0; right: 0; bottom: 0;
+                                                            background: rgba(0,0,0,0.5);
+                                                            display: flex;
+                                                            justify-content: center;
+                                                            align-items: center;
+                                                            z-index: 9999;
+                                                        ">
+                                                            <div style="
+                                                                background: white;
+                                                                padding: 30px;
+                                                                border-radius: 10px;
+                                                                text-align: center;
+                                                                max-width: 400px;
+                                                                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                                                            ">
+                                                                <h2>Account Activated Successfully!</h2>
+                                                                <p>Your account has been activated. Please login to continue.</p>
+                                                                <button id="loginContinueBtn" style="
+                                                                    padding: 10px 20px;
+                                                                    background: #b48d64;
+                                                                    color: white;
+                                                                    border: none;
+                                                                    border-radius: 5px;
+                                                                    cursor: pointer;
+                                                                    font-size: 16px;
+                                                                ">Login to Continue</button>
+                                                            </div>
+                                                        </div>
+                                                    `);
+                                                }
+                                                $('#activationModal').fadeIn();
+
+                                                // Remove previous handler to prevent multiple bindings
+                                                $(document).off('click', '#loginContinueBtn').on('click', '#loginContinueBtn', function() {
+                                                    window.location.href = '<?php echo esc_url(home_url('/')); ?>';
+                                                });
+                                            } else {
+                                                alert('Activation failed: ' + activateResponse.data);
+                                            }
+                                        },
+                                        error: function() {
+                                            $('#ajaxLoader').hide();
+                                            alert('Error activating user.');
+                                        }
+                                    });
+                                },
+                                prefill: {
+                                    name: userData.name,
+                                    email: userData.email,
+                                    contact: userData.phone
+                                },
+                                theme: {
+                                    color: "#b48d64"
+                                }
+                            };
+
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            var rzp1 = new Razorpay(options);
+                            rzp1.open();
+                        } else {
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            alert('Unable to create payment order. Please try again.');
+                        }
+                    },
+                    error: function() {
+                        $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                        alert('AJAX error creating payment order.');
+                    }
+                });
+
+            }).fail(function() {
+                alert('Error contacting server to fetch user data.');
+                $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+            });
+        }
+
+        jQuery(document).on('click', '#pay200', function(e) {
+            e.preventDefault();
+            startPayment(200);
+        });
+
+        jQuery(document).on('click', '#pay10000', function(e) {
+            e.preventDefault();
+            startPayment(10000);
+        });
+    });
+    </script>
     <?php endif;
 });

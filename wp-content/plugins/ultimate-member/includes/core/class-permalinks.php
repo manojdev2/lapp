@@ -109,96 +109,142 @@ if ( ! class_exists( 'um\core\Permalinks' ) ) {
 		/**
 		 * Activates an account via email
 		 */
+		// public function activate_account_via_email_link() {
+		// 	if ( isset( $_REQUEST['act'] ) && 'activate_via_email' === sanitize_key( $_REQUEST['act'] ) && isset( $_REQUEST['hash'] ) && is_string( $_REQUEST['hash'] ) && strlen( $_REQUEST['hash'] ) == 40 &&
+		// 		 isset( $_REQUEST['user_id'] ) && is_numeric( $_REQUEST['user_id'] ) ) { // valid token
+
+		// 		$user_id = absint( $_REQUEST['user_id'] );
+		// 		if ( is_user_logged_in() && get_current_user_id() !== $user_id ) {
+		// 			// Cannot activate another user account. Please log out and try again.
+		// 			wp_safe_redirect( um_user_profile_url( get_current_user_id() ) );
+		// 			exit;
+		// 		}
+
+		// 		delete_option( "um_cache_userdata_{$user_id}" );
+
+		// 		$account_secret_hash = get_user_meta( $user_id, 'account_secret_hash', true );
+		// 		if ( empty( $account_secret_hash ) || strtolower( sanitize_text_field( $_REQUEST['hash'] ) ) !== strtolower( $account_secret_hash ) ) {
+		// 			wp_safe_redirect( add_query_arg( 'err', 'activation_link_used', um_get_core_page( 'login' ) ) );
+		// 			exit;
+		// 		}
+
+		// 		$account_secret_hash_expiry = get_user_meta( $user_id, 'account_secret_hash_expiry', true );
+		// 		if ( ! empty( $account_secret_hash_expiry ) && time() > $account_secret_hash_expiry ) {
+		// 			wp_safe_redirect( add_query_arg( 'err', 'activation_link_expired', um_get_core_page( 'login' ) ) );
+		// 			exit;
+		// 		}
+
+		// 		// Activate account link is valid. Can be approved below.
+
+		// 		um_fetch_user( $user_id ); // @todo maybe don't need to fetch.
+		// 		UM()->common()->users()->approve( $user_id, true );
+
+		// 		$user_role      = UM()->roles()->get_priority_user_role( $user_id );
+		// 		$user_role_data = UM()->roles()->role_data( $user_role );
+
+		// 		// Log in automatically after activation.
+		// 		$login = ! empty( $user_role_data['login_email_activate'] ); // Role setting "Login user after validating the activation link?"
+		// 		if ( $login && ! is_user_logged_in() ) {
+		// 			UM()->user()->auto_login( $user_id );
+		// 		}
+
+		// 		/**
+		// 		 * Fires on user activation after visit link for email confirmation.
+		// 		 *
+		// 		 * @hook um_after_email_confirmation
+		// 		 *
+		// 		 * @param {int} $user_id The user ID.
+		// 		 *
+		// 		 * @since 2.0
+		// 		 *
+		// 		 * @example <caption>Doing some code after email confirmation and approved $user_id.</caption>
+		// 		 * function my_after_email_confirmation( $user_id ) {
+		// 		 *     // your code here
+		// 		 * }
+		// 		 * add_filter( 'um_after_email_confirmation', 'my_after_email_confirmation' );
+		// 		 */
+		// 		do_action( 'um_after_email_confirmation', $user_id );
+
+		// 		// Prepare redirect link.
+		// 		$set_password_required = get_user_meta( $user_id, 'um_set_password_required', true );
+		// 		if ( empty( $set_password_required ) ) {
+		// 			// Role setting "URL redirect after email activation".
+		// 			$redirect = empty( $user_role_data['url_email_activate'] ) ? um_get_core_page( 'login', 'account_active' ) : trim( $user_role_data['url_email_activate'] );
+		// 		} else {
+		// 			// Redirect to the change password page if there is no password for this user.
+		// 			$redirect = UM()->password()->reset_url( $user_id );
+		// 		}
+		// 		/**
+		// 		 * Filter to change the redirect URL after email confirmation.
+		// 		 *
+		// 		 * @hook um_after_email_confirmation_redirect
+		// 		 *
+		// 		 * @param {string} $redirect The redirect URL.
+		// 		 * @param {int}    $user_id  The user ID.
+		// 		 * @param {bool}   $login    Auto login has been applied and user currently is logged in.
+		// 		 *
+		// 		 * @since 2.0
+		// 		 *
+		// 		 * @example <caption>Change redirect after confirmation only for the user with ID=99.</caption>
+		// 		 * function my_after_email_confirmation_redirect( $redirect, $user_id, $login ) {
+		// 		 *     // your code here
+		// 		 *     if ( $user_id === 99 ) {
+		// 		 *         $redirect = 'custom_url';
+		// 		 *     }
+		// 		 *     return $redirect;
+		// 		 * }
+		// 		 * add_filter( 'um_after_email_confirmation_redirect', 'my_after_email_confirmation_redirect', 10, 3 );
+		// 		 */
+		// 		$redirect = apply_filters( 'um_after_email_confirmation_redirect', $redirect, $user_id, $login );
+		// 		um_safe_redirect( $redirect );
+		// 	}
+		// }
+
 		public function activate_account_via_email_link() {
-			if ( isset( $_REQUEST['act'] ) && 'activate_via_email' === sanitize_key( $_REQUEST['act'] ) && isset( $_REQUEST['hash'] ) && is_string( $_REQUEST['hash'] ) && strlen( $_REQUEST['hash'] ) == 40 &&
-				 isset( $_REQUEST['user_id'] ) && is_numeric( $_REQUEST['user_id'] ) ) { // valid token
+    if (
+        isset($_REQUEST['act']) && 'activate_via_email' === sanitize_key($_REQUEST['act']) &&
+        isset($_REQUEST['hash']) && is_string($_REQUEST['hash']) && strlen($_REQUEST['hash']) == 40 &&
+        isset($_REQUEST['user_id']) && is_numeric($_REQUEST['user_id'])
+    ) {
+        $user_id = absint($_REQUEST['user_id']);
 
-				$user_id = absint( $_REQUEST['user_id'] );
-				if ( is_user_logged_in() && get_current_user_id() !== $user_id ) {
-					// Cannot activate another user account. Please log out and try again.
-					wp_safe_redirect( um_user_profile_url( get_current_user_id() ) );
-					exit;
-				}
+        if (is_user_logged_in() && get_current_user_id() !== $user_id) {
+            // Cannot activate another user account. Please log out and try again.
+            wp_safe_redirect(um_user_profile_url(get_current_user_id()));
+            exit;
+        }
 
-				delete_option( "um_cache_userdata_{$user_id}" );
+        delete_option("um_cache_userdata_{$user_id}");
 
-				$account_secret_hash = get_user_meta( $user_id, 'account_secret_hash', true );
-				if ( empty( $account_secret_hash ) || strtolower( sanitize_text_field( $_REQUEST['hash'] ) ) !== strtolower( $account_secret_hash ) ) {
-					wp_safe_redirect( add_query_arg( 'err', 'activation_link_used', um_get_core_page( 'login' ) ) );
-					exit;
-				}
+        $account_secret_hash = get_user_meta($user_id, 'account_secret_hash', true);
+        if (empty($account_secret_hash) || strtolower(sanitize_text_field($_REQUEST['hash'])) !== strtolower($account_secret_hash)) {
+            wp_safe_redirect(add_query_arg('err', 'activation_link_used', um_get_core_page('login')));
+            exit;
+        }
 
-				$account_secret_hash_expiry = get_user_meta( $user_id, 'account_secret_hash_expiry', true );
-				if ( ! empty( $account_secret_hash_expiry ) && time() > $account_secret_hash_expiry ) {
-					wp_safe_redirect( add_query_arg( 'err', 'activation_link_expired', um_get_core_page( 'login' ) ) );
-					exit;
-				}
+        $account_secret_hash_expiry = get_user_meta($user_id, 'account_secret_hash_expiry', true);
+        if (!empty($account_secret_hash_expiry) && time() > $account_secret_hash_expiry) {
+            wp_safe_redirect(add_query_arg('err', 'activation_link_expired', um_get_core_page('login')));
+            exit;
+        }
 
-				// Activate account link is valid. Can be approved below.
+        // Redirect to membership selection page WITH user_id and hash parameters
+        // $redirect = add_query_arg([
+        //     'um_pending_activation' => 1,
+        //     'user_id' => $user_id,
+        //     'hash' => sanitize_key($_REQUEST['hash'])
+        // ], 'http://localhost/wordpress/?page_id=27995');
+		$redirect = add_query_arg([
+		    'um_pending_activation' => 1,
+		    'user_id' => $user_id,
+		    'hash' => sanitize_key($_REQUEST['hash'])
+		], add_query_arg([], get_permalink(27995)) );
 
-				um_fetch_user( $user_id ); // @todo maybe don't need to fetch.
-				UM()->common()->users()->approve( $user_id, true );
+        um_safe_redirect($redirect);
+        exit; // Prevent further execution to avoid auto activation
+    }
+}
 
-				$user_role      = UM()->roles()->get_priority_user_role( $user_id );
-				$user_role_data = UM()->roles()->role_data( $user_role );
-
-				// Log in automatically after activation.
-				$login = ! empty( $user_role_data['login_email_activate'] ); // Role setting "Login user after validating the activation link?"
-				if ( $login && ! is_user_logged_in() ) {
-					UM()->user()->auto_login( $user_id );
-				}
-
-				/**
-				 * Fires on user activation after visit link for email confirmation.
-				 *
-				 * @hook um_after_email_confirmation
-				 *
-				 * @param {int} $user_id The user ID.
-				 *
-				 * @since 2.0
-				 *
-				 * @example <caption>Doing some code after email confirmation and approved $user_id.</caption>
-				 * function my_after_email_confirmation( $user_id ) {
-				 *     // your code here
-				 * }
-				 * add_filter( 'um_after_email_confirmation', 'my_after_email_confirmation' );
-				 */
-				do_action( 'um_after_email_confirmation', $user_id );
-
-				// Prepare redirect link.
-				$set_password_required = get_user_meta( $user_id, 'um_set_password_required', true );
-				if ( empty( $set_password_required ) ) {
-					// Role setting "URL redirect after email activation".
-					$redirect = empty( $user_role_data['url_email_activate'] ) ? um_get_core_page( 'login', 'account_active' ) : trim( $user_role_data['url_email_activate'] );
-				} else {
-					// Redirect to the change password page if there is no password for this user.
-					$redirect = UM()->password()->reset_url( $user_id );
-				}
-				/**
-				 * Filter to change the redirect URL after email confirmation.
-				 *
-				 * @hook um_after_email_confirmation_redirect
-				 *
-				 * @param {string} $redirect The redirect URL.
-				 * @param {int}    $user_id  The user ID.
-				 * @param {bool}   $login    Auto login has been applied and user currently is logged in.
-				 *
-				 * @since 2.0
-				 *
-				 * @example <caption>Change redirect after confirmation only for the user with ID=99.</caption>
-				 * function my_after_email_confirmation_redirect( $redirect, $user_id, $login ) {
-				 *     // your code here
-				 *     if ( $user_id === 99 ) {
-				 *         $redirect = 'custom_url';
-				 *     }
-				 *     return $redirect;
-				 * }
-				 * add_filter( 'um_after_email_confirmation_redirect', 'my_after_email_confirmation_redirect', 10, 3 );
-				 */
-				$redirect = apply_filters( 'um_after_email_confirmation_redirect', $redirect, $user_id, $login );
-				um_safe_redirect( $redirect );
-			}
-		}
 
 		/**
 		 * Makes an activate link for any user
