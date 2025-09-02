@@ -48,7 +48,7 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
                                             <i class="fa fa-exclamation-triangle me-2"></i><?php echo apply_filters('cea_event_close', esc_html('Event closed.', 'cea-post-types')); ?>
                                         </div>
                                     <?php else: ?>
-                                        <span class="badge bg-success mb-3 align-self-start">Upcoming</span>
+                                        <span class="badge bg-success mb-3 align-self-start">Upcoming Event!!!</span>
                                     <?php endif; ?>
 
                                     <!-- Event Header -->
@@ -80,131 +80,176 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
                                     </section>
 
                                     <!-- Event Info Sections -->
-                                    <section class="event-info-sections row g-4">
-                                        <?php
-                                        $event_elements_json = get_post_meta(get_the_ID(), 'cea_event_event_info_items', true);
-                                        $event_elements = json_decode(stripslashes($event_elements_json), true);
-                                        $event_elements = $event_elements['Enable'];
-                                        $event_col = get_post_meta(get_the_ID(), 'cea_event_col_layout', true);
-                                        $event_col = $event_col != '' ? explode("-", $event_col) : array('6', '6', '12');
+<section class="event-info-sections row g-4">
+    <?php
+    $event_elements_json = get_post_meta(get_the_ID(), 'cea_event_event_info_items', true);
+    $event_elements = json_decode(stripslashes($event_elements_json), true);
+    $event_elements = $event_elements['Enable'];
+    $event_col = get_post_meta(get_the_ID(), 'cea_event_col_layout', true);
+    $event_col = $event_col != '' ? explode("-", $event_col) : array('6', '6', '12');
 
-                                        // Common meta
-                                        $organizer      = get_post_meta(get_the_ID(), 'cea_event_organiser_name', true);
-                                        $organizer_desg = get_post_meta(get_the_ID(), 'cea_event_organiser_designation', true);
-                                        $event_cost     = get_post_meta(get_the_ID(), 'cea_event_cost', true);
-                                        $event_link     = get_post_meta(get_the_ID(), 'cea_event_link', true);
-                                        $event_text     = get_post_meta(get_the_ID(), 'cea_event_link_text', true);
-                                        $event_target   = get_post_meta(get_the_ID(), 'cea_event_link_target', true);
+    // Common meta
+    $organizer      = get_post_meta(get_the_ID(), 'cea_event_organiser_name', true);
+    $organizer_desg = get_post_meta(get_the_ID(), 'cea_event_organiser_designation', true);
+    $event_cost     = get_post_meta(get_the_ID(), 'cea_event_cost', true);
+    $event_link     = get_post_meta(get_the_ID(), 'cea_event_link', true);
+    $event_text     = get_post_meta(get_the_ID(), 'cea_event_link_text', true);
+    $event_target   = get_post_meta(get_the_ID(), 'cea_event_link_target', true);
 
-                                        $venue_name     = get_post_meta(get_the_ID(), 'cea_event_venue_name', true);
-                                        $venue_address  = get_post_meta(get_the_ID(), 'cea_event_venue_address', true);
-                                        $email          = get_post_meta(get_the_ID(), 'cea_event_email', true);
-                                        $phone          = get_post_meta(get_the_ID(), 'cea_event_phone', true);
-                                        $website        = get_post_meta(get_the_ID(), 'cea_event_website', true);
+    $venue_name     = get_post_meta(get_the_ID(), 'cea_event_venue_name', true);
+    $venue_address  = get_post_meta(get_the_ID(), 'cea_event_venue_address', true);
+    $email          = get_post_meta(get_the_ID(), 'cea_event_email', true);
+    $phone          = get_post_meta(get_the_ID(), 'cea_event_phone', true);
+    $website        = get_post_meta(get_the_ID(), 'cea_event_website', true);
 
-                                        $lat            = get_post_meta(get_the_ID(), 'cea_event_gmap_latitude', true);
-                                        $lang           = get_post_meta(get_the_ID(), 'cea_event_gmap_longitude', true);
-                                        $marker         = get_post_meta(get_the_ID(), 'cea_event_gmap_marker', true);
-                                        $map_style      = get_post_meta(get_the_ID(), 'cea_event_gmap_style', true);
-                                        $map_height     = get_post_meta(get_the_ID(), 'cea_event_gmap_height', true);
-                                        $map_height     = !empty($map_height) ? $map_height : '400';
+    $lat            = get_post_meta(get_the_ID(), 'cea_event_gmap_latitude', true);
+    $lang           = get_post_meta(get_the_ID(), 'cea_event_gmap_longitude', true);
+    $marker         = get_post_meta(get_the_ID(), 'cea_event_gmap_marker', true);
+    $map_style      = get_post_meta(get_the_ID(), 'cea_event_gmap_style', true);
+    $map_height     = get_post_meta(get_the_ID(), 'cea_event_gmap_height', true);
+    $map_height     = !empty($map_height) ? $map_height : '400';
 
-                                        $contact        = get_post_meta(get_the_ID(), 'cea_event_contact_form', true);
+    $contact        = get_post_meta(get_the_ID(), 'cea_event_contact_form', true);
 
-                                        foreach ($event_elements as $elem => $val):
-                                            switch ($elem):
+global $wpdb;
+$current_user = wp_get_current_user();
+$registration_email = $current_user->user_email;
 
-                                                case "event-details": ?>
-                                                    <div class="col-md-<?php echo esc_attr($event_col[0]); ?>">
-                                                        <div class="event-info card h-100 border-0 shadow-sm p-3">
-                                                            <h4 class="h5 mb-3"><i class="fa fa-info-circle me-2 text-primary"></i><?php echo apply_filters('cea_event_info_details', 'Event Details'); ?></h4>
-                                                            <ul class="list-unstyled">
-                                                                <?php if ($organizer): ?>
-                                                                    <li><i class="fa fa-user me-2 text-muted"></i><strong>Organizer:</strong> <?php echo esc_html($organizer); ?> <?php if ($organizer_desg) echo " – <em>" . esc_html($organizer_desg) . "</em>"; ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($event_date): ?>
-                                                                    <li><i class="fa fa-calendar-day me-2 text-muted"></i><strong>Start:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($event_date)) : $event_date; ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($end_date): ?>
-                                                                    <li><i class="fa fa-calendar-check me-2 text-muted"></i><strong>End:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($event_cost): ?>
-                                                                    <li><i class="fa fa-ticket-alt me-2 text-muted"></i><strong>Cost:</strong> <?php echo esc_html($event_cost); ?></li>
-                                                                <?php endif; ?>
-                                                               <?php if ($event_link): ?>
-															    <li class="mt-2">
-															        <?php if ($date_exist && (time() - (60 * 60 * 24)) > strtotime($date_exist)): ?>
-															            <!-- Event Closed: Show Disabled Button -->
-															            <button class="btn btn-secondary btn-sm" disabled>
-															                <?php echo esc_html($event_text ? $event_text : 'Registration Closed'); ?>
-															            </button>
-															        <?php else: ?>
-															            <!-- Event Open: Show Active Register Button -->
-															            <a class="btn btn-primary btn-sm" href="<?php echo esc_url($event_link); ?>" target="<?php echo esc_attr($event_target); ?>">
-															                <?php echo esc_html($event_text ? $event_text : 'Register Now'); ?>
-															            </a>
-															        <?php endif; ?>
-															    </li>
-															<?php endif; ?>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                <?php break;
+$user_entry = false;
+$is_approved = false;
 
-                                                case "event-venue": ?>
-                                                    <div class="col-md-<?php echo esc_attr($event_col[1]); ?>">
-                                                        <div class="event-venue card h-100 border-0 shadow-sm p-3">
-                                                            <h4 class="h5 mb-3"><i class="fa fa-map-marker-alt me-2 text-danger"></i><?php echo apply_filters('cea_event_venue_name', 'Event Venue'); ?></h4>
-                                                            <ul class="list-unstyled">
-                                                                <?php if ($venue_name): ?>
-                                                                    <li><i class="fa fa-building me-2 text-muted"></i><strong>Venue:</strong> <?php echo esc_html($venue_name); ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($venue_address): ?>
-                                                                    <li><i class="fa fa-map me-2 text-muted"></i><?php echo esc_textarea($venue_address); ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($phone): ?>
-                                                                    <li><i class="fa fa-phone me-2 text-muted"></i><?php echo esc_html($phone); ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($email): ?>
-                                                                    <li><i class="fa fa-envelope me-2 text-muted"></i><?php echo esc_html($email); ?></li>
-                                                                <?php endif; ?>
-                                                                <?php if ($website): ?>
-                                                                    <li><i class="fa fa-globe me-2 text-muted"></i><a href="<?php echo esc_url($website); ?>" target="_blank"><?php echo esc_url($website); ?></a></li>
-                                                                <?php endif; ?>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                <?php break;
+if (!empty($registration_email)) {
+$user_entry = $wpdb->get_row(
+    $wpdb->prepare(
+        "SELECT e.entry_id
+         FROM {$wpdb->prefix}frmt_form_entry_meta m
+         INNER JOIN {$wpdb->prefix}frmt_form_entry e ON m.entry_id = e.entry_id
+         WHERE m.meta_key = 'email-1' AND m.meta_value = %s",
+        $registration_email
+    )
+);
+    if ($current_user->ID) {
+        $account_status = get_user_meta($current_user->ID, 'account_status', true);
+        $is_approved = ($account_status === 'approved' || $account_status === 'yes');
+    }
+}
+    ?>
+    <script>
+    console.log("registration_email: <?php echo esc_js($registration_email); ?>");
+    console.log("user_entry: <?php echo esc_js(json_encode($user_entry)); ?>");
+    console.log("is_approved: <?php echo esc_js($is_approved ? 'true' : 'false'); ?>");
+    </script>
+    <?php
 
-                                                case "event-map":
-                                                    if ($lat): wp_enqueue_script('cea-gmaps'); ?>
-                                                        <div class="col-12">
-                                                            <div class="event-map card border-0 shadow-sm p-3">
-                                                                <h4 class="h5 mb-3"><i class="fa fa-map me-2 text-success"></i>Location Map</h4>
-                                                                <div id="ceagmap" class="rounded" style="width:100%;height:<?php echo absint($map_height); ?>px;"
-                                                                    data-map-lat="<?php echo esc_attr($lat); ?>"
-                                                                    data-map-lang="<?php echo esc_attr($lang); ?>"
-                                                                    data-map-style="<?php echo esc_attr($map_style); ?>"
-                                                                    data-map-marker="<?php echo esc_url($marker); ?>"></div>
-                                                            </div>
-                                                        </div>
-                                                    <?php endif;
-                                                break;
+    foreach ($event_elements as $elem => $val):
+        switch ($elem):
+            case "event-details":
+    ?>
+                <div class="col-md-<?php echo esc_attr($event_col[0]); ?>">
+                    <div class="event-info card h-100 border-0 shadow-sm p-3">
+                        <h4 class="h5 mb-3">
+                            <i class="fa fa-info-circle me-2 text-primary"></i>
+                            <?php echo apply_filters('cea_event_info_details', 'Event Details'); ?>
+                        </h4>
+                        <ul class="list-unstyled">
+                            <?php if ($organizer): ?>
+                                <li><i class="fa fa-user me-2 text-muted"></i><strong>Organizer:</strong> <?php echo esc_html($organizer); ?> <?php if ($organizer_desg) echo " – <em>" . esc_html($organizer_desg) . "</em>"; ?></li>
+                            <?php endif; ?>
+                            <?php if ($event_date): ?>
+                                <li><i class="fa fa-calendar-day me-2 text-muted"></i><strong>Event Start Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($event_date)) : $event_date; ?></li>
+                            <?php endif; ?>
+                            <?php if ($end_date): ?>
+                                <li><i class="fa fa-calendar-check me-2 text-muted"></i><strong>Event End Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
+                            <?php endif; ?>
+                            <?php if ($event_cost): ?>
+                                <li><i class="fa fa-ticket-alt me-2 text-muted"></i><strong>Cost:</strong> <?php echo esc_html($event_cost); ?></li>
+                            <?php endif; ?>
+                            <?php if ($event_link): ?>
+                                <li class="mt-2">
+                                    <?php if ($date_exist && (time() - (60 * 60 * 24)) > strtotime($date_exist)): ?>
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <?php echo esc_html('Registration Closed'); ?>
+                                        </button>
+                                    <?php elseif ($user_entry && $is_approved): ?>
+                                        <button class="btn btn-success btn-sm" disabled>
+                                            Registered
+                                        </button>
+                                    <?php else: ?>
+                                        <a class="btn btn-primary btn-sm" href="<?php echo esc_url($event_link); ?>" target="<?php echo esc_attr($event_target); ?>">
+                                            <?php echo esc_html($event_text ? $event_text : 'Register Now'); ?>
+                                        </a>
+                                    <?php endif; ?>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
+    <?php
+            break;
 
-                                                case "event-form":
-                                                    if ($contact): ?>
-                                                        <div class="col-12">
-                                                            <div class="event-contact card border-0 shadow-sm p-3">
-                                                                <h4 class="h5 mb-3"><i class="fa fa-envelope-open me-2 text-info"></i>Contact</h4>
-                                                                <?php echo do_shortcode($contact); ?>
-                                                            </div>
-                                                        </div>
-                                                    <?php endif;
-                                                break;
+            case "event-venue":
+    ?>
+                <div class="col-md-<?php echo esc_attr($event_col[1]); ?>">
+                    <div class="event-venue card h-100 border-0 shadow-sm p-3">
+                        <h4 class="h5 mb-3"><i class="fa fa-map-marker-alt me-2 text-danger"></i><?php echo apply_filters('cea_event_venue_name', 'Event Venue'); ?></h4>
+                        <ul class="list-unstyled">
+                            <?php if ($venue_name): ?>
+                                <li><i class="fa fa-building me-2 text-muted"></i><strong>Venue:</strong> <?php echo esc_html($venue_name); ?></li>
+                            <?php endif; ?>
+                            <?php if ($venue_address): ?>
+                                <li><i class="fa fa-map me-2 text-muted"></i><?php echo esc_textarea($venue_address); ?></li>
+                            <?php endif; ?>
+                            <?php if ($phone): ?>
+                                <li><i class="fa fa-phone me-2 text-muted"></i><?php echo esc_html($phone); ?></li>
+                            <?php endif; ?>
+                            <?php if ($email): ?>
+                                <li><i class="fa fa-envelope me-2 text-muted"></i><?php echo esc_html($email); ?></li>
+                            <?php endif; ?>
+                            <?php if ($website): ?>
+                                <li><i class="fa fa-globe me-2 text-muted"></i><a href="<?php echo esc_url($website); ?>" target="_blank"><?php echo esc_url($website); ?></a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
+    <?php
+            break;
 
-                                            endswitch;
-                                        endforeach; ?>
-                                    </section>
+            case "event-map":
+                if ($lat):
+                    wp_enqueue_script('cea-gmaps');
+    ?>
+                    <div class="col-12">
+                        <div class="event-map card border-0 shadow-sm p-3">
+                            <h4 class="h5 mb-3"><i class="fa fa-map me-2 text-success"></i>Location Map</h4>
+                            <div id="ceagmap" class="rounded" style="width:100%;height:<?php echo absint($map_height); ?>px;"
+                                data-map-lat="<?php echo esc_attr($lat); ?>"
+                                data-map-lang="<?php echo esc_attr($lang); ?>"
+                                data-map-style="<?php echo esc_attr($map_style); ?>"
+                                data-map-marker="<?php echo esc_url($marker); ?>"></div>
+                        </div>
+                    </div>
+    <?php
+                endif;
+            break;
+
+            case "event-form":
+                if ($contact):
+    ?>
+                    <div class="col-12">
+                        <div class="event-contact card border-0 shadow-sm p-3">
+                            <h4 class="h5 mb-3"><i class="fa fa-envelope-open me-2 text-info"></i>Contact</h4>
+                            <?php echo do_shortcode($contact); ?>
+                        </div>
+                    </div>
+    <?php
+                endif;
+            break;
+
+        endswitch;
+    endforeach;
+    ?>
+</section>
+
                                 </article>
 
                                 <?php endwhile; ?>
