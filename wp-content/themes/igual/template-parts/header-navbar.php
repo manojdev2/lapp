@@ -68,19 +68,19 @@ if (!empty($navbar_items)):
 							Igual_Wp_Framework::igual_address(Igual_Wp_Elements::igual_options('header-address'));
 							echo '</li>';
 							break;
-						case "search":
-							$keys = array(
-								'chk' => 'header-chk',
-								'fields' => array(
-									'search_type' => 'search-type'
-								)
-							);
-							$search_values = Igual_Wp_Elements::igual_get_meta_and_option_values($keys);
-							$search_type = $search_values['search_type'];
-							echo '<li>';
-							Igual_Wp_Framework::igual_search_modal($search_type, 'navbar');
-							echo '</li>';
-							break;
+						// case "search":
+						// 	$keys = array(
+						// 		'chk' => 'header-chk',
+						// 		'fields' => array(
+						// 			'search_type' => 'search-type'
+						// 		)
+						// 	);
+						// 	$search_values = Igual_Wp_Elements::igual_get_meta_and_option_values($keys);
+						// 	$search_type = $search_values['search_type'];
+						// 	echo '<li>';
+						// 	Igual_Wp_Framework::igual_search_modal($search_type, 'navbar');
+						// 	echo '</li>';
+						// 	break;
 						case "logo": ?>
 							<li class="header-titles-wrapper">
 								<div class="header-titles">
