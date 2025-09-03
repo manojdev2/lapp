@@ -169,7 +169,19 @@ $t = new CEACPTElements();
 													<?php echo esc_html( $event_cost ); ?>
 												</p><?php
 												endif;
-												
+												//Event Prefix
+												$event_prefix = get_post_meta( get_the_ID(), 'cea_event_prefix', true );
+												if( $event_prefix ): ?>	
+												<p class="event-prefix">
+													<span class="event-subtitle">
+														<strong><?php
+															echo apply_filters( 'cea_event_prefix_label', 'Prefix' ); ?> : 
+														</strong>
+													</span>
+													<?php echo esc_html( $event_prefix ); ?>
+												</p><?php
+												endif;
+
 												//Event Custom Link
 												$event_link = get_post_meta( get_the_ID(), 'cea_event_link', true );
 												$event_text = get_post_meta( get_the_ID(), 'cea_event_link_text', true );

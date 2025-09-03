@@ -529,6 +529,14 @@ if( isset( $cea_shortcodes['team'] ) ){
 			'default'	=> ''
 		),
 		array( 
+			'label'	=> esc_html__( 'Event Prefix', 'cea-post-types' ),
+			'desc'	=> esc_html__( 'Enter prefix. Example: RBA/JUL/, it will start from 1001', 'cea-post-types' ), 
+			'id'	=> $prefix.'prefix',
+			'tab'	=> esc_html__( 'Events', 'cea-post-types' ),
+			'type'	=> 'text',
+			'default'	=> ''
+		),
+		array( 
 			'label'	=> esc_html__( 'Custom Link for Event Item', 'cea-post-types' ),
 			'desc'	=> esc_html__( 'Enter custom link to redirect custom event page.', 'cea-post-types' ), 
 			'id'	=> $prefix.'link',

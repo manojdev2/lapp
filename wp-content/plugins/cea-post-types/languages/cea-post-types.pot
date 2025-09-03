@@ -984,6 +984,14 @@ msgstr ""
 msgid "Enter event cost."
 msgstr ""
 
+#: admin/metabox/metabox-config.php:525
+msgid "Event Prefix"
+msgstr ""
+
+#: admin/metabox/metabox-config.php:526
+msgid "Enter prefix. Example: RBA/JUL/, it will start from 1001"
+msgstr ""
+
 #: admin/metabox/metabox-config.php:533
 msgid "Custom Link for Event Item"
 msgstr ""

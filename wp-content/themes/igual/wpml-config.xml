@@ -41,6 +41,7 @@
 		<custom-field action="translate">cea_event_end_date</custom-field>
 		<custom-field action="translate">cea_event_time</custom-field>
 		<custom-field action="translate">cea_event_cost</custom-field>
+		<custom-field action="translate">cea_event_prefix</custom-field>
 		<custom-field action="copy">cea_event_link</custom-field>
 		<custom-field action="translate">cea_event_link_text</custom-field>
 		<custom-field action="translate">cea_event_venue_name</custom-field>

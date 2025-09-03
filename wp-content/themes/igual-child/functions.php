@@ -365,6 +365,7 @@ function get_cea_event_details_from_your_meta($post_id)
 		'cea_event_start_date' => 'start_date',
 		'cea_event_time' => 'time',
 		'cea_event_cost' => 'cost',
+        'cea_event_prefix' => 'prefix',
 		'cea_event_end_date' => 'end_date',
 		'cea_event_organiser_name' => 'organiser_name',
 		'cea_event_duration' => 'duration',

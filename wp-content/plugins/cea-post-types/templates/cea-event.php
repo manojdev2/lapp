@@ -57,7 +57,7 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
                                             <h1 class="event-title display-5 fw-bold mb-3"><?php the_title(); ?></h1>
                                         <?php endif; ?>
                                         <?php if ($event_date): ?>
-                                            <div class="event-meta text-muted small">
+                                            <div class="event-meta text-muted small text-left">
                                                 <i class="fa fa-calendar-alt me-2"></i>
                                                 <?php echo !empty($date_format) ? date($date_format, strtotime($event_date)) : $event_date; ?>
                                                 <?php if (!empty($event_time)): ?>
@@ -92,6 +92,7 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
     $organizer      = get_post_meta(get_the_ID(), 'cea_event_organiser_name', true);
     $organizer_desg = get_post_meta(get_the_ID(), 'cea_event_organiser_designation', true);
     $event_cost     = get_post_meta(get_the_ID(), 'cea_event_cost', true);
+    $event_prefix     = get_post_meta(get_the_ID(), 'cea_event_prefix', true);
     $event_link     = get_post_meta(get_the_ID(), 'cea_event_link', true);
     $event_text     = get_post_meta(get_the_ID(), 'cea_event_link_text', true);
     $event_target   = get_post_meta(get_the_ID(), 'cea_event_link_target', true);
@@ -111,11 +112,24 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
 
     $contact        = get_post_meta(get_the_ID(), 'cea_event_contact_form', true);
 
+// if (isset($_GET['cea-event'])) {
+//     $cea_event = sanitize_text_field($_GET['cea-event']);
+//     setcookie('cea_event', $cea_event, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
+// } else {
+//     $cea_event = isset($_COOKIE['cea_event']) ? sanitize_text_field($_COOKIE['cea_event']) : '';
+// }
+
 if (isset($_GET['cea-event'])) {
-    $cea_event = sanitize_text_field($_GET['cea-event']);
-    setcookie('cea_event', $cea_event, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
-} else {
-    $cea_event = isset($_COOKIE['cea_event']) ? sanitize_text_field($_COOKIE['cea_event']) : '';
+    $cea_event    = sanitize_text_field($_GET['cea-event']);
+    $event_cost   = get_post_meta(get_the_ID(), 'cea_event_cost', true);
+    $event_prefix = get_post_meta(get_the_ID(), 'cea_event_prefix', true);
+
+    $cea_data = json_encode([
+        'slug'   => $cea_event,
+        'cost'   => $event_cost,
+        'prefix' => $event_prefix
+    ]);
+    setcookie('cea_event_data', $cea_data, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
 }
 
 function cea_event_slug_to_label($slug) {
@@ -170,10 +184,10 @@ if (!empty($registration_email) && !empty($cea_event)) {
                                 <li><i class="fa fa-user me-2 text-muted"></i><strong>Organizer:</strong> <?php echo esc_html($organizer); ?> <?php if ($organizer_desg) echo " – <em>" . esc_html($organizer_desg) . "</em>"; ?></li>
                             <?php endif; ?>
                             <?php if ($event_date): ?>
-                                <li><i class="fa fa-calendar-day me-2 text-muted"></i><strong>Event Start Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($event_date)) : $event_date; ?></li>
+                                <li><i class="fa fa-calendar-check me-2 text-muted"></i><strong>Event Start Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($event_date)) : $event_date; ?></li>
                             <?php endif; ?>
                             <?php if ($end_date): ?>
-                                <li><i class="fa fa-calendar-check me-2 text-muted"></i><strong>Event End Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
+                                <li><i class="fa fa-calendar-times me-2 text-muted"></i><strong>Event End Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
                             <?php endif; ?>
                             <?php if ($event_cost): ?>
                                 <li><i class="fa fa-ticket-alt me-2 text-muted"></i><strong>Cost:</strong> <?php echo esc_html($event_cost); ?></li>

@@ -447,8 +447,10 @@ if( !class_exists( 'Igual_Addon' ) ){
 
 function display_dynamic_event_heading() {
     if (is_page('event-register')) {
-        if (isset($_COOKIE['cea_event'])) {
-            $event_slug = sanitize_text_field($_COOKIE['cea_event']);
+        if (isset($_COOKIE['cea_event_data']) && !empty($_COOKIE['cea_event_data'])) {
+            $cea_data = isset($_COOKIE['cea_event_data']) ? json_decode(stripslashes($_COOKIE['cea_event_data']), true) : [];
+    $cea_event    = isset($cea_data['slug'])   ? sanitize_text_field($cea_data['slug'])   : '';
+            $event_slug = $cea_event ;
             if (!empty($event_slug)) {
                 return '
                     <div style="text-align:center; margin-bottom:1.5em; color:#3c332b;">
@@ -519,25 +521,63 @@ function enqueue_event_type_autofill_script() {
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            var ceaEvent = getCookie('cea_event');
+            var ceaEventDataRaw = getCookie('cea_event_data');
+            var ceaEvent = '';
+            var eventCost = '';
+            if (ceaEventDataRaw) {
+                try {
+                    var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
+                    if (ceaEventData.slug) {
+                        ceaEvent = ceaEventData.slug;
+                    }
+                    if (ceaEventData.cost) {
+                        eventCost = ceaEventData.cost;
+                    }
+                } catch(e) {
+                    console.error('Failed to parse cea_event_data cookie JSON:', e);
+                }
+            }
             if (!ceaEvent) return;
 
             // Convert slug back to readable label (e.g. "rba-60-celebration" -> "Rba 60 Celebration")
-            ceaEvent = ceaEvent.replace(/-/g, ' ');
-            ceaEvent = ceaEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
+            var readableEvent = ceaEvent.replace(/-/g, ' ');
+            readableEvent = readableEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
 
-            // Find the input field by class. Forminator adds class to container, so search for input inside
+            // Autofill for event type input
             var container = document.querySelector('.event-type-autofill');
             if (container) {
                 var input = container.querySelector('input[type="text"], input[type="hidden"], input[type="email"], input[type="search"]');
                 if (input) {
-                    input.value = ceaEvent;
-                    input.setAttribute('readonly', 'readonly'); // Use readonly so it submits the value but is not editable
-                    input.style.background = "#f4e9dc"; // Slight background for disabled look, adjust as needed
-                    input.style.color = "#222"; // Adjust text color if needed
+                    input.value = readableEvent;
+                    input.setAttribute('readonly', 'readonly');
+                    input.style.background = "#f4e9dc";
+                    input.style.color = "#222";
                     input.style.cursor = "not-allowed";
+                    input.style.width = "100%";
+                    input.style.boxSizing = "border-box";
+                    input.style.whiteSpace = "nowrap";
+                    input.style.overflow = "hidden";
+                    input.style.textOverflow = "ellipsis";
+                    input.setAttribute('title', readableEvent);
                 }
             }
+
+            // Autofill for event cost input (name="text-4")
+            var costInput = document.querySelector('input[name="text-4"]');
+            if (costInput && eventCost) {
+                costInput.value = eventCost;
+                costInput.setAttribute('readonly', 'readonly');
+                costInput.style.background = "#f4e9dc";
+                costInput.style.color = "#222";
+                costInput.style.cursor = "not-allowed";
+                costInput.style.width = "100%";
+                costInput.style.boxSizing = "border-box";
+                costInput.style.whiteSpace = "nowrap";
+                costInput.style.overflow = "hidden";
+                costInput.style.textOverflow = "ellipsis";
+                costInput.setAttribute('title', eventCost);
+            }
+
         });
 JS;
 
@@ -547,6 +587,7 @@ JS;
     }
 }
 add_action('wp_enqueue_scripts', 'enqueue_event_type_autofill_script');
+
 
 // Razorpay Integration for Order Id creation
 use Razorpay\Api\Api;
@@ -703,6 +744,50 @@ function handle_check_user_registration() {
     wp_die();
 }
 
+add_action('wp_ajax_get_next_prefix_number', 'get_next_prefix_number_callback');
+add_action('wp_ajax_nopriv_get_next_prefix_number', 'get_next_prefix_number_callback');
+
+function get_next_prefix_number_callback() {
+    global $wpdb;
+
+    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+    $event_slug = isset($_POST['event_slug']) ? sanitize_text_field($_POST['event_slug']) : '';
+    $prefix = isset($_POST['event_prefix']) ? sanitize_text_field($_POST['event_prefix']) : '';
+
+    if (empty($email) || empty($event_slug) || empty($prefix)) {
+        wp_send_json_error(['message' => 'Missing parameters']);
+        wp_die();
+    }
+
+$prefix_only = $prefix;
+
+$event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
+
+$max_num = $wpdb->get_var(
+    $wpdb->prepare(
+        "SELECT MAX(CAST(SUBSTRING_INDEX(m_value.meta_value, '/', -1) AS UNSIGNED))
+         FROM {$wpdb->prefix}frmt_form_entry_meta AS m_value
+         INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_email ON m_value.entry_id = m_email.entry_id
+         INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_event ON m_value.entry_id = m_event.entry_id
+         WHERE m_value.meta_key = 'text-5'
+           AND m_value.meta_value LIKE %s
+           AND m_email.meta_key = 'email-1'
+           AND m_event.meta_key = 'text-3'
+           AND LOWER(TRIM(m_event.meta_value)) = %s",
+        $prefix_only . '%',
+        $event_slug_db
+    )
+);
+
+$next_number = $max_num ? $max_num + 1 : 1001;
+$next_formatted = $prefix_only . sprintf("%04d", $next_number);
+
+
+
+    wp_send_json_success(['next_prefix_number' => $next_formatted]);
+    wp_die();
+}
+
 add_action('wp_footer', function () {
     if (is_page('event-register')) : ?>
         <style>
@@ -743,8 +828,8 @@ add_action('wp_footer', function () {
                     $('[name="email-1"]').after('<div class="rz-error" id="error-email">Please enter a valid email address.</div>');
                 if ($('#error-phone').length === 0)
                     $('[name="phone-1"]').after('<div class="rz-error" id="error-phone">Please enter a valid phone number</div>');
-                if ($('#error-amount').length === 0)
-                    $('[name="select-5"]').after('<div class="rz-error" id="error-amount">Please select an amount.</div>');
+                // if ($('#error-amount').length === 0)
+                //     $('[name="select-5"]').after('<div class="rz-error" id="error-amount">Please select an amount.</div>');
                 if ($('#error-city').length === 0)
                     $('[name="address-1-city"]').after('<div class="rz-error" id="error-city">Please enter your city.</div>');
             }
@@ -797,7 +882,7 @@ function showCustomPopup(message) {
                 {name:'email-1', err:'#error-email'},
                 {name:'phone-1', err:'#error-phone'},
                 {name:'address-1-city', err:'#error-city'},
-                {name:'select-5', err:'#error-amount'}
+                // {name:'select-5', err:'#error-amount'}
             ];
 
             fields.forEach(function(field){
@@ -826,10 +911,11 @@ function showCustomPopup(message) {
                     valid = val !== '' && phonePattern.test(val);
                 } else if (fieldName === 'address-1-city') {
                     valid = val !== '';
-                } else if (fieldName === 'select-5') {
-                    var amount = $('[name="select-5"] option:selected').text().trim();
-                    valid = amount !== '' && !isNaN(amount);
-                }
+                } 
+                // else if (fieldName === 'select-5') {
+                //     var amount = $('[name="select-5"] option:selected').text().trim();
+                //     valid = amount !== '' && !isNaN(amount);
+                // }
                 if (!valid) {
                     $(errorSelector).show();
                 } else {
@@ -862,9 +948,24 @@ function showCustomPopup(message) {
                 var userName = $('[name="name-1-first-name"]').val().trim();
                 var userEmail = $('[name="email-1"]').val().trim();
                 var userPhone = $('[name="phone-1"]').val().trim();
-                var amountVal = $('[name="select-5"] option:selected').text().trim();
-                var razorpayAmount = parseInt(amountVal, 10) * 100;
-                var eventSlug = getCookie('cea_event');
+                var amountVal = '';
+                var razorpayAmount = 0
+                var ceaEventDataRaw = getCookie('cea_event_data');
+                var eventSlug = '';
+                var eventPrefix = '';
+                if (ceaEventDataRaw) {
+                    try {
+                        var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
+                        if (ceaEventData.slug) {
+                            eventSlug = ceaEventData.slug;
+                            amountVal = ceaEventData.cost;  
+                            razorpayAmount = parseInt(parseFloat(amountVal) * 100);
+                            eventPrefix = ceaEventData.prefix;
+                        }
+                    } catch(e) {
+                        console.error('Failed to parse cea_event_data cookie JSON:', e);
+                    }
+                }
 
                 if (!userEmail || !eventSlug) {
                     alert('Email or event information missing.');
@@ -915,11 +1016,42 @@ function showCustomPopup(message) {
                                     name: "Event Registration",
                                     description: "Pay to register",
                                     order_id: response.data.order_id,
+                                    // handler: function (response) {
+                                    //     $('[name="text-1"]').val(response.razorpay_payment_id);
+                                    //     $('[name="text-2"]').val(response.razorpay_order_id);
+                                    //     $(".forminator-button-submit").trigger("click");
+                                    // },
                                     handler: function (response) {
-                                        $('[name="text-1"]').val(response.razorpay_payment_id);
-                                        $('[name="text-2"]').val(response.razorpay_order_id);
-                                        $(".forminator-button-submit").trigger("click");
-                                    },
+                                        // Set payment IDs as before
+                                            $('[name="text-1"]').val(response.razorpay_payment_id);
+                                            $('[name="text-2"]').val(response.razorpay_order_id);
+
+                                            $.ajax({
+                                                url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                                                type: 'POST',
+                                                async: false, 
+                                                data: {
+                                                    action: 'get_next_prefix_number',
+                                                    email: userEmail,
+                                                    event_slug: eventSlug,
+                                                    event_prefix: eventPrefix
+                                                },
+                                                success: function(res) {
+                                                    console.log('Next prefix number response:', res);
+                                                    if(res.success && res.data.next_prefix_number) {
+                                                        $('[name="text-5"]').val(res.data.next_prefix_number);
+                                                    } else {
+                                                        console.error('Failed to get next prefix number');
+                                                    }
+                                                },
+                                                error: function() {
+                                                    console.error('AJAX error getting next prefix number');
+                                                }
+                                            });
+                                        
+                                            $(".forminator-button-submit").trigger("click");
+                                        },
+
                                     prefill: {
                                         name: userName,
                                         email: userEmail,
