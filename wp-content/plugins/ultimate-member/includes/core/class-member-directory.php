@@ -2565,6 +2565,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 				'dropdown_actions'     => $dropdown_actions,
 				'hook_just_after_name' => wp_kses( preg_replace( '/^\s+/im', '', $hook_just_after_name ), UM()->get_allowed_html( 'templates' ) ),
 				'hook_after_user_name' => wp_kses( preg_replace( '/^\s+/im', '', $hook_after_user_name ), UM()->get_allowed_html( 'templates' ) ),
+				'show_in_directory'    => get_user_meta( $user_id, 'show_in_directory', true ) ? '1' : '0',
 			);
 
 			if ( ! empty( $directory_data['show_tagline'] ) ) {

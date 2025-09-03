@@ -31,7 +31,10 @@ $unique_hash = substr( md5( $args['form_id'] ), 10, 5 ); ?>
 
 		<# if ( data.length > 0 ) { #>
 			<# _.each( data, function( user, key, list ) { #>
-
+<# console.log('User show_in_directory:', user); #>
+<# if ( user.show_in_directory !== '1' ) { #>
+    <# return; #>
+<# } #>
 				<div id="um-member-{{{user.card_anchor}}}-<?php echo esc_attr( $unique_hash ) ?>" class="um-member um-role-{{{user.role}}} {{{user.account_status}}} <?php if ( $cover_photos ) { echo 'with-cover'; } ?>">
 
 					<span class="um-member-status {{{user.account_status}}}">
