@@ -96,6 +96,11 @@ define('WP_DEBUG', false);
 /* That's all, stop editing! Happy publishing. */
 define('WP_HOME', 'https://lapp-production.up.railway.app');
 define('WP_SITEURL', 'https://lapp-production.up.railway.app');
+
+@ini_set( 'upload_max_size' , '64M' );
+@ini_set( 'post_max_size', '64M');
+@ini_set( 'memory_limit', '128M' );
+
 // Force WordPress to recognize HTTPS behind Railway proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
 	$_SERVER['HTTPS'] = 'on';
