@@ -247,7 +247,30 @@ $description_key = UM()->profile()->get_show_bio_key( $args );
 
 				<?php
 			}
-		} 
+		}  else {
+			$menu_enabled = UM()->options()->get( 'profile_menu' );
+			$profile_tabs = UM()->profile()->tabs_active();
+
+			$nav    = UM()->profile()->active_tab();
+			$subnav = UM()->profile()->active_subnav();
+			$subnav = ! empty( $subnav ) ? $subnav : 'default';
+
+			if ( $menu_enabled || ! empty( $profile_tabs[ $nav ]['hidden'] ) ) {
+				?>
+				<div class="um-profile-body <?php echo esc_attr( $nav . ' ' . $nav . '-' . $subnav ); ?>">
+
+					<?php
+					// Custom hook to display tabbed content
+					/** This action is documented in ultimate-member/templates/profile.php */
+					do_action( "um_profile_content_$nav", $args );
+					/** This action is documented in ultimate-member/templates/profile.php */
+					do_action( "um_profile_content_{$nav}_$subnav", $args );
+					?>
+					<div class="clear"></div>
+				</div>
+				<?php
+			}
+		}
 
 		/**
 		 * Fires for adding content below User Profile menu.

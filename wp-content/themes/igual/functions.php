@@ -434,6 +434,7 @@ add_filter( 'um_content_restriction_post_types', function( $post_types ) {
     return $post_types;
 });
 
+
 if( !class_exists( 'Igual_Addon' ) ){
 	add_filter( 'excerpt_length', 'igual_default_excerpt_length', 10 );
 	function igual_default_excerpt_length( $length ){
@@ -754,39 +755,41 @@ function get_next_prefix_number_callback() {
     $event_slug = isset($_POST['event_slug']) ? sanitize_text_field($_POST['event_slug']) : '';
     $prefix = isset($_POST['event_prefix']) ? sanitize_text_field($_POST['event_prefix']) : '';
 
-    if (empty($email) || empty($event_slug) || empty($prefix)) {
+    if (empty($email) || empty($event_slug)) {
         wp_send_json_error(['message' => 'Missing parameters']);
         wp_die();
     }
 
-$prefix_only = $prefix;
+    if (empty($prefix)) {
+        $current_month_shortcode = strtoupper(date('M'));
+        $prefix = "RBA/{$current_month_shortcode}/";
+    }
 
-$event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
+    $event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
 
-$max_num = $wpdb->get_var(
-    $wpdb->prepare(
-        "SELECT MAX(CAST(SUBSTRING_INDEX(m_value.meta_value, '/', -1) AS UNSIGNED))
-         FROM {$wpdb->prefix}frmt_form_entry_meta AS m_value
-         INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_email ON m_value.entry_id = m_email.entry_id
-         INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_event ON m_value.entry_id = m_event.entry_id
-         WHERE m_value.meta_key = 'text-5'
-           AND m_value.meta_value LIKE %s
-           AND m_email.meta_key = 'email-1'
-           AND m_event.meta_key = 'text-3'
-           AND LOWER(TRIM(m_event.meta_value)) = %s",
-        $prefix_only . '%',
-        $event_slug_db
-    )
-);
+    $max_num = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT MAX(CAST(SUBSTRING_INDEX(m_value.meta_value, '/', -1) AS UNSIGNED))
+             FROM {$wpdb->prefix}frmt_form_entry_meta AS m_value
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_email ON m_value.entry_id = m_email.entry_id
+             INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_event ON m_value.entry_id = m_event.entry_id
+             WHERE m_value.meta_key = 'text-5'
+               AND m_value.meta_value LIKE %s
+               AND m_email.meta_key = 'email-1'
+               AND m_event.meta_key = 'text-3'
+               AND LOWER(TRIM(m_event.meta_value)) = %s",
+            $prefix . '%',
+            $event_slug_db
+        )
+    );
 
-$next_number = $max_num ? $max_num + 1 : 1001;
-$next_formatted = $prefix_only . sprintf("%04d", $next_number);
-
-
+    $next_number = $max_num ? $max_num + 1 : 1001;
+    $next_formatted = $prefix . sprintf("%04d", $next_number);
 
     wp_send_json_success(['next_prefix_number' => $next_formatted]);
     wp_die();
 }
+
 
 add_action('wp_footer', function () {
     if (is_page('event-register')) :
@@ -846,6 +849,8 @@ add_action('wp_footer', function () {
                 $('[name="phone-1"]').after('<div class="rz-error" id="error-phone">Please enter a valid phone number</div>');
             if ($('#error-city').length === 0)
                 $('[name="address-1-city"]').after('<div class="rz-error" id="error-city">Please enter your city.</div>');
+            if ($('#error-amount').length === 0)
+                $('[name="text-4"]').after('<div class="rz-error" id="error-amount">Please enter the event amount.</div>');
         }
         addErrorDivs();
 
@@ -907,6 +912,7 @@ add_action('wp_footer', function () {
             {name:'email-1', err:'#error-email'},
             {name:'phone-1', err:'#error-phone'},
             {name:'address-1-city', err:'#error-city'},
+            {name: 'text-4', err: '#error-amount'},
         ];
 
         fields.forEach(function(field){
@@ -934,6 +940,9 @@ add_action('wp_footer', function () {
                 var phonePattern = /^[1-9]\d{9}$/;
                 valid = val !== '' && phonePattern.test(val);
             } else if (fieldName === 'address-1-city') {
+                valid = val !== '';
+            }
+            else if (fieldName === 'text-4') {
                 valid = val !== '';
             }
             if (!valid) {
@@ -1009,6 +1018,8 @@ add_action('wp_footer', function () {
                         $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
                         return;
                     }
+            amountVal = $('[name="text-4"]').val().trim();
+            razorpayAmount = parseInt(parseFloat(amountVal) * 100);
                     startRazorpay();
                 },
                 error: function() {
