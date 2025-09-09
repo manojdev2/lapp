@@ -187,7 +187,7 @@ function send_simplified_cea_event_notification($post)
 	}
 
 	if (!empty($event_details['cost'])) {
-		$currency = !empty($event_details['currency_symbol']) ? $event_details['currency_symbol'] : '$';
+		$currency = !empty($event_details['currency_symbol']) ? $event_details['currency_symbol'] : '₹';
 		$message .= '<div class="detail-row"><strong> Cost:</strong> ' . $currency . $event_details['cost'] . '</div>';
 	}
 

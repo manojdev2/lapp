@@ -190,7 +190,10 @@ if (!empty($registration_email) && !empty($cea_event)) {
                                 <li><i class="fa fa-calendar-times me-2 text-muted"></i><strong>Event End Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
                             <?php endif; ?>
                             <?php if ($event_cost): ?>
-                                <li><i class="fa fa-ticket-alt me-2 text-muted"></i><strong>Cost:</strong> <?php echo esc_html($event_cost); ?></li>
+                                 <li>
+                                  <i class="fa fa-ticket-alt me-2 text-muted"></i>
+                                  <strong>Cost:</strong> ₹<?php echo number_format((float)$event_cost); ?>
+                                </li>
                             <?php endif; ?>
                             <?php if ($event_link): ?>
                                 <li class="mt-2">
