@@ -992,7 +992,6 @@ add_action('wp_footer', function () {
             if (ceaEventDataRaw) {
                 try {
                     var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
-                    console.log('Parsed cea_event_data:', ceaEventData);
                     if (ceaEventData.event_title) {
                         eventSlug = decodeHtmlEntities(ceaEventData.event_title);
                         eventPrefix = ceaEventData.prefix;

@@ -60,7 +60,7 @@ do_action('igual_top_footer_bottom');
                                     <li>
                                         <p class="footer-copyright">
                                             © Copyright <?php echo date('Y'); ?>. All rights reserved.
-                                            <a href="#" target="_blank">RBA</a>. Designed by
+                                            <a href="https://revenuebar.org/">RBA</a>. Designed by
                                             <a href="https://www.krossark.com" target="_blank">Krossark</a>
                                         </p>
                                     </li>
