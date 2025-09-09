@@ -539,12 +539,9 @@ function enqueue_event_type_autofill_script() {
                 }
             }
             if (!ceaEvent) return;
-
-            // Convert slug back to readable label (e.g. "rba-60-celebration" -> "Rba 60 Celebration")
             var readableEvent = ceaEvent.replace(/-/g, ' ');
             readableEvent = readableEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
 
-            // Autofill for event type input
             var container = document.querySelector('.event-type-autofill');
             if (container) {
                 var input = container.querySelector('input[type="text"], input[type="hidden"], input[type="email"], input[type="search"]');
@@ -562,8 +559,6 @@ function enqueue_event_type_autofill_script() {
                     input.setAttribute('title', readableEvent);
                 }
             }
-
-            // Autofill for event cost input (name="text-4")
             var costInput = document.querySelector('input[name="text-4"]');
             if (costInput && eventCost) {
                 costInput.value = eventCost;
@@ -794,7 +789,6 @@ function get_next_prefix_number_callback() {
 add_action('wp_footer', function () {
     if (is_page('event-register')) :
 
-        // If user is logged in, get their info
         $user_data = [];
         if (is_user_logged_in()) {
             $current_user = wp_get_current_user();
@@ -837,9 +831,7 @@ add_action('wp_footer', function () {
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
     jQuery(document).ready(function($) {
-        // Pass PHP user data to JS
         var loggedInUser = <?php echo json_encode($user_data); ?>;
-
         function addErrorDivs() {
             if ($('#error-name').length === 0)
                 $('[name="name-1-first-name"]').after('<div class="rz-error" id="error-name">Please enter your name.</div>');
@@ -854,13 +846,11 @@ add_action('wp_footer', function () {
         }
         addErrorDivs();
 
-        // Prefill fields if user is logged in
         if (loggedInUser && Object.keys(loggedInUser).length > 0) {
             if (loggedInUser.name)  $('[name="name-1-first-name"]').val(loggedInUser.name);
             if (loggedInUser.email) $('[name="email-1"]').val(loggedInUser.email);
             if (loggedInUser.phone) $('[name="phone-1"]').val(loggedInUser.phone);
 
-            // Trigger validation on prefilled fields
             setTimeout(function() {
                 fields.forEach(function(field) {
                     validateField(field.name, field.err);
@@ -896,7 +886,7 @@ add_action('wp_footer', function () {
                     font-size: 1em;
                     cursor: pointer;
                     transition: background-color 0.3s ease;
-                  ">OK</button>
+                    ">OK</button>
               </div>
             </div>`;
             $('body').append(modalHtml);
@@ -912,7 +902,7 @@ add_action('wp_footer', function () {
             {name:'email-1', err:'#error-email'},
             {name:'phone-1', err:'#error-phone'},
             {name:'address-1-city', err:'#error-city'},
-            {name: 'text-4', err: '#error-amount'},
+            {name:'text-4', err:'#error-amount'},
         ];
 
         fields.forEach(function(field){
@@ -953,6 +943,17 @@ add_action('wp_footer', function () {
             return valid;
         }
 
+
+        var originalAmount = $('[name="text-4"]').val();
+            
+        $('[name="select-4"]').on('change', function() {
+            var userType = $(this).val();
+            if (userType === 'Student') {
+                    $('[name="text-4"]').val('0'); 
+            } else {
+                    $('[name="text-4"]').val(originalAmount);
+            }
+        });
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
@@ -978,8 +979,9 @@ add_action('wp_footer', function () {
             var userEmail = $('[name="email-1"]').val().trim();
             var userPhone = $('[name="phone-1"]').val().trim();
 
-            var amountVal = '';
-            var razorpayAmount = 0;
+            var amountVal = $('[name="text-4"]').val().trim();
+            var razorpayAmount = parseInt(parseFloat(amountVal) * 100);
+
             var ceaEventDataRaw = getCookie('cea_event_data');
             var eventSlug = '';
             var eventPrefix = '';
@@ -988,8 +990,6 @@ add_action('wp_footer', function () {
                     var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
                     if (ceaEventData.slug) {
                         eventSlug = ceaEventData.slug;
-                        amountVal = ceaEventData.cost;
-                        razorpayAmount = parseInt(parseFloat(amountVal) * 100);
                         eventPrefix = ceaEventData.prefix;
                     }
                 } catch(e) {
@@ -1001,7 +1001,37 @@ add_action('wp_footer', function () {
                 alert('Email or event information missing.');
                 return;
             }
-
+     
+            if (razorpayAmount === 0) {
+                $('[name="text-1"]').val('');
+                $('[name="text-2"]').val('');
+                $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
+                $.ajax({
+                    url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'get_next_prefix_number',
+                        email: userEmail,
+                        event_slug: eventSlug,
+                        event_prefix: eventPrefix
+                    },
+                    success: function(res) {
+                        if (res.success && res.data.next_prefix_number) {
+                            $('[name="text-5"]').val(res.data.next_prefix_number);
+                        }
+                        $(".forminator-button-submit").trigger("click");
+                    },
+                    error: function() {
+                        showCustomPopup('Error fetching prefix number. Please try again.');
+                        $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                    },
+                    complete: function(){
+                        $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                    }
+                });
+            
+                return; 
+            }
             $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
 
             $.ajax({
@@ -1018,8 +1048,6 @@ add_action('wp_footer', function () {
                         $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
                         return;
                     }
-            amountVal = $('[name="text-4"]').val().trim();
-            razorpayAmount = parseInt(parseFloat(amountVal) * 100);
                     startRazorpay();
                 },
                 error: function() {
@@ -1051,6 +1079,10 @@ add_action('wp_footer', function () {
                                     $('[name="text-1"]').val(response.razorpay_payment_id);
                                     $('[name="text-2"]').val(response.razorpay_order_id);
 
+                                    // Show loading state on payment button
+                                    $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
+
+                                    // AJAX call to get next prefix number
                                     $.ajax({
                                         url: '<?php echo admin_url("admin-ajax.php"); ?>',
                                         type: 'POST',
@@ -1068,9 +1100,15 @@ add_action('wp_footer', function () {
                                         },
                                         error: function() {
                                             console.error('AJAX error getting next prefix number');
+                                        },
+                                        complete: function() {
+                                            // Restore button state after AJAX completes
+                                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                                        
+                                            // Trigger form submission
+                                            $(".forminator-button-submit").trigger("click");
                                         }
                                     });
-                                    $(".forminator-button-submit").trigger("click");
                                 },
                                 prefill: {
                                     name: userName,
@@ -1099,7 +1137,6 @@ add_action('wp_footer', function () {
 <?php
     endif;
 });
-
 
 
 add_action('wp_footer', function () {

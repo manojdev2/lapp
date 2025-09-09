@@ -926,9 +926,9 @@ function um_submit_form_errors_hook_( $submitted_data, $form_data ) {
 						// Primary email should be required everytime.
 						UM()->form()->add_error( $key, __( 'You must provide your email', 'ultimate-member' ) );
 					} elseif ( 'register' === $mode && $email_exists ) {
-						UM()->form()->add_error( $key, __( 'The email you entered is incorrect', 'ultimate-member' ) );
+						UM()->form()->add_error( $key, __( 'This email is already registered', 'ultimate-member' ) );
 					} elseif ( 'profile' === $mode && $email_exists && absint( $email_exists ) !== absint( $submitted_data['user_id'] ) ) {
-						UM()->form()->add_error( $key, __( 'The email you entered is incorrect', 'ultimate-member' ) );
+						UM()->form()->add_error( $key, __( 'This email is already taken by another account', 'ultimate-member' ) );
 					} elseif ( ! is_email( $submitted_data[ $key ] ) ) {
 						UM()->form()->add_error( $key, __( 'The email you entered is incorrect', 'ultimate-member' ) );
 					} elseif ( ! UM()->validation()->safe_username( $submitted_data[ $key ] ) ) {
