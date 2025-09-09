@@ -449,10 +449,9 @@ if( !class_exists( 'Igual_Addon' ) ){
 function display_dynamic_event_heading() {
     if (is_page('event-register')) {
         if (isset($_COOKIE['cea_event_data']) && !empty($_COOKIE['cea_event_data'])) {
-            $cea_data = isset($_COOKIE['cea_event_data']) ? json_decode(stripslashes($_COOKIE['cea_event_data']), true) : [];
-    $cea_event    = isset($cea_data['slug'])   ? sanitize_text_field($cea_data['slug'])   : '';
-            $event_slug = $cea_event ;
-            if (!empty($event_slug)) {
+            $cea_data = json_decode(stripslashes($_COOKIE['cea_event_data']), true);
+            $cea_event = isset($cea_data['event_title']) ? html_entity_decode(sanitize_text_field($cea_data['event_title'])) : '';
+            if (!empty($cea_event)) {
                 return '
                     <div style="text-align:center; margin-bottom:1.5em; color:#3c332b;">
                         <span 
@@ -474,12 +473,13 @@ function display_dynamic_event_heading() {
                             <i class="fa fa-user" style="vertical-align:middle;"></i>
                         </span>
                         <div style="font-size:1.5em;font-weight:600;color: white;font-family:Source Sans Pro;">
-                            ' . ucwords(str_replace('-', ' ', $event_slug)) . ' Registration
+                            ' . esc_html($cea_event) . ' Registration
                         </div>
                     </div>
                 ';
             }
         }
+
         return '
             <div style="text-align:center; margin-bottom:1.5em; color:#3c332b;">
                 <span 
@@ -521,6 +521,13 @@ function enqueue_event_type_autofill_script() {
             return '';
         }
 
+        // Helper to decode HTML entities in JS
+        function decodeHtmlEntities(str) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = str;
+            return txt.value;
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             var ceaEventDataRaw = getCookie('cea_event_data');
             var ceaEvent = '';
@@ -528,8 +535,8 @@ function enqueue_event_type_autofill_script() {
             if (ceaEventDataRaw) {
                 try {
                     var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
-                    if (ceaEventData.slug) {
-                        ceaEvent = ceaEventData.slug;
+                    if (ceaEventData.event_title) {
+                        ceaEvent = decodeHtmlEntities(ceaEventData.event_title);
                     }
                     if (ceaEventData.cost) {
                         eventCost = ceaEventData.cost;
@@ -539,14 +546,12 @@ function enqueue_event_type_autofill_script() {
                 }
             }
             if (!ceaEvent) return;
-            var readableEvent = ceaEvent.replace(/-/g, ' ');
-            readableEvent = readableEvent.replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
 
             var container = document.querySelector('.event-type-autofill');
             if (container) {
                 var input = container.querySelector('input[type="text"], input[type="hidden"], input[type="email"], input[type="search"]');
                 if (input) {
-                    input.value = readableEvent;
+                    input.value = ceaEvent;
                     input.setAttribute('readonly', 'readonly');
                     input.style.background = "#f4e9dc";
                     input.style.color = "#222";
@@ -556,7 +561,7 @@ function enqueue_event_type_autofill_script() {
                     input.style.whiteSpace = "nowrap";
                     input.style.overflow = "hidden";
                     input.style.textOverflow = "ellipsis";
-                    input.setAttribute('title', readableEvent);
+                    input.setAttribute('title', ceaEvent);
                 }
             }
             var costInput = document.querySelector('input[name="text-4"]');
@@ -573,7 +578,6 @@ function enqueue_event_type_autofill_script() {
                 costInput.style.textOverflow = "ellipsis";
                 costInput.setAttribute('title', eventCost);
             }
-
         });
 JS;
 
@@ -988,8 +992,9 @@ add_action('wp_footer', function () {
             if (ceaEventDataRaw) {
                 try {
                     var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
-                    if (ceaEventData.slug) {
-                        eventSlug = ceaEventData.slug;
+                    console.log('Parsed cea_event_data:', ceaEventData);
+                    if (ceaEventData.event_title) {
+                        eventSlug = decodeHtmlEntities(ceaEventData.event_title);
                         eventPrefix = ceaEventData.prefix;
                     }
                 } catch(e) {

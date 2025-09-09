@@ -112,22 +112,19 @@ if (!empty($event_sidebars) && is_active_sidebar($event_sidebars)) {
 
     $contact        = get_post_meta(get_the_ID(), 'cea_event_contact_form', true);
 
-// if (isset($_GET['cea-event'])) {
-//     $cea_event = sanitize_text_field($_GET['cea-event']);
-//     setcookie('cea_event', $cea_event, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
-// } else {
-//     $cea_event = isset($_COOKIE['cea_event']) ? sanitize_text_field($_COOKIE['cea_event']) : '';
-// }
 
 if (isset($_GET['cea-event'])) {
     $cea_event    = sanitize_text_field($_GET['cea-event']);
     $event_cost   = get_post_meta(get_the_ID(), 'cea_event_cost', true);
     $event_prefix = get_post_meta(get_the_ID(), 'cea_event_prefix', true);
+    $event_title = get_the_title();
 
     $cea_data = json_encode([
         'slug'   => $cea_event,
         'cost'   => $event_cost,
-        'prefix' => $event_prefix
+        'prefix' => $event_prefix,
+        'event_id' => get_the_ID(),
+        'event_title' => $event_title,
     ]);
     setcookie('cea_event_data', $cea_data, time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
 }
@@ -190,7 +187,7 @@ if (!empty($registration_email) && !empty($cea_event)) {
                                 <li><i class="fa fa-calendar-times me-2 text-muted"></i><strong>Event End Date:</strong> <?php echo !empty($date_format) ? date($date_format, strtotime($end_date)) : $end_date; ?></li>
                             <?php endif; ?>
                             <?php if ($event_cost): ?>
-                                 <li>
+                               <li>
                                   <i class="fa fa-ticket-alt me-2 text-muted"></i>
                                   <strong>Cost:</strong> ₹<?php echo number_format((float)$event_cost); ?>
                                 </li>
