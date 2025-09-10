@@ -889,29 +889,29 @@ function um_submit_form_errors_hook_( $submitted_data, $form_data ) {
 				break;
 
 			case 'unique_username':
-				if ( '' === $submitted_data[ $key ] ) {
-					UM()->form()->add_error( $key, __( 'You must provide a username', 'ultimate-member' ) );
-				} elseif ( 'register' === $mode && username_exists( sanitize_user( $submitted_data[ $key ] ) ) ) {
-					UM()->form()->add_error( $key, __( 'The username you entered is incorrect', 'ultimate-member' ) );
-				} elseif ( is_email( $submitted_data[ $key ] ) ) {
-					UM()->form()->add_error( $key, __( 'Username cannot be an email', 'ultimate-member' ) );
-				} elseif ( ! UM()->validation()->safe_username( $submitted_data[ $key ] ) ) {
-					UM()->form()->add_error( $key, __( 'Your username contains invalid characters', 'ultimate-member' ) );
-				}
-				break;
-
+			    if ( '' === $submitted_data[ $key ] ) {
+			        UM()->form()->add_error( $key, __( 'You must provide a username', 'ultimate-member' ) );
+			    } elseif ( 'register' === $mode && username_exists( sanitize_user( $submitted_data[ $key ] ) ) ) {
+			        UM()->form()->add_error( $key, __( 'This username is already exists', 'ultimate-member' ) );
+			    } elseif ( is_email( $submitted_data[ $key ] ) ) {
+			        UM()->form()->add_error( $key, __( 'Username cannot be an email address', 'ultimate-member' ) );
+			    } elseif ( ! UM()->validation()->safe_username( $submitted_data[ $key ] ) ) {
+			        UM()->form()->add_error( $key, __( 'Your username contains invalid characters', 'ultimate-member' ) );
+			    }
+			    break;
+			
 			case 'unique_username_or_email':
-				if ( '' === $submitted_data[ $key ] ) {
-					UM()->form()->add_error( $key, __( 'You must provide a username or email', 'ultimate-member' ) );
-				} elseif ( 'register' === $mode && username_exists( sanitize_user( $submitted_data[ $key ] ) ) ) {
-					UM()->form()->add_error( $key, __( 'The username you entered is incorrect', 'ultimate-member' ) );
-				} elseif ( 'register' === $mode && email_exists( $submitted_data[ $key ] ) ) {
-					UM()->form()->add_error( $key, __( 'The email you entered is incorrect', 'ultimate-member' ) );
-				} elseif ( ! UM()->validation()->safe_username( $submitted_data[ $key ] ) ) {
-					UM()->form()->add_error( $key, __( 'Your username contains invalid characters', 'ultimate-member' ) );
-				}
-				break;
-
+			    if ( '' === $submitted_data[ $key ] ) {
+			        UM()->form()->add_error( $key, __( 'You must provide a username or email address', 'ultimate-member' ) );
+			    } elseif ( 'register' === $mode && username_exists( sanitize_user( $submitted_data[ $key ] ) ) ) {
+			        UM()->form()->add_error( $key, __( 'This username is already exists', 'ultimate-member' ) );
+			    } elseif ( 'register' === $mode && email_exists( $submitted_data[ $key ] ) ) {
+			        UM()->form()->add_error( $key, __( 'This email address is already registered', 'ultimate-member' ) );
+			    } elseif ( ! UM()->validation()->safe_username( $submitted_data[ $key ] ) ) {
+			        UM()->form()->add_error( $key, __( 'Your username contains invalid characters', 'ultimate-member' ) );
+			    }
+			    break;
+			
 			case 'unique_email':
 				$submitted_data[ $key ] = trim( $submitted_data[ $key ] );
 
