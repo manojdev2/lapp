@@ -140,9 +140,7 @@ $registration_email = $current_user->user_email;
 $user_entry = false;
 $is_approved = false;
 
-if (!empty($registration_email) && !empty($cea_event)) {
-    $event_label = cea_event_slug_to_label($cea_event);
-
+if (!empty($registration_email) && !empty(get_the_ID())) {
     $user_entry = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT e.entry_id
@@ -150,10 +148,10 @@ if (!empty($registration_email) && !empty($cea_event)) {
              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
              WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
-               AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s
+               AND m_event.meta_key = 'text-6' AND m_event.meta_value = %d
              LIMIT 1",
             $registration_email,
-            strtolower(trim($event_label))
+            get_the_ID()
         )
     );
 

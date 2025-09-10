@@ -703,24 +703,108 @@ function activate_user_after_payment_callback() {
     wp_send_json_success('User activated, role assigned, and payment info saved.');
 }
 
+// add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
+// add_action('wp_ajax_nopriv_check_user_registration', 'handle_check_user_registration');
+// function handle_check_user_registration() {
+//     global $wpdb;
+
+//     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+//     $event_slug = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : '';
+
+//     if (empty($email) || empty($event_slug)) {
+//         wp_send_json_error(['message' => 'Missing parameters']);
+//         wp_die();
+//     }
+
+//     // Convert slug to label, lowercase and trim for consistency
+//     $event_label = strtolower(trim(ucwords(str_replace('-', ' ', $event_slug))));
+
+//     // Log for debugging (check PHP error log)
+//     error_log("Checking email: $email; Event: $event_slug; Converted label: $event_label");
+
+//     $entry_exists = $wpdb->get_var(
+//         $wpdb->prepare(
+//             "SELECT COUNT(*)
+//              FROM {$wpdb->prefix}frmt_form_entry e
+//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
+//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
+//              WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
+//                AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s",
+//             $email,
+//             $event_label
+//         )
+//     );
+
+//     if ($entry_exists) {
+//         wp_send_json_success(['registered' => true]);
+//     } else {
+//         wp_send_json_success(['registered' => false]);
+//     }
+
+//     wp_die();
+// }
+
+// add_action('wp_ajax_get_next_prefix_number', 'get_next_prefix_number_callback');
+// add_action('wp_ajax_nopriv_get_next_prefix_number', 'get_next_prefix_number_callback');
+
+// function get_next_prefix_number_callback() {
+//     global $wpdb;
+
+//     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+//     $event_slug = isset($_POST['event_slug']) ? sanitize_text_field($_POST['event_slug']) : '';
+//     $prefix = isset($_POST['event_prefix']) ? sanitize_text_field($_POST['event_prefix']) : '';
+
+//     if (empty($email) || empty($event_slug)) {
+//         wp_send_json_error(['message' => 'Missing parameters']);
+//         wp_die();
+//     }
+
+//     if (empty($prefix)) {
+//         $current_month_shortcode = strtoupper(date('M'));
+//         $prefix = "RBA/{$current_month_shortcode}/";
+//     }
+
+//     $event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
+
+//     $max_num = $wpdb->get_var(
+//         $wpdb->prepare(
+//             "SELECT MAX(CAST(SUBSTRING_INDEX(m_value.meta_value, '/', -1) AS UNSIGNED))
+//              FROM {$wpdb->prefix}frmt_form_entry_meta AS m_value
+//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_email ON m_value.entry_id = m_email.entry_id
+//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_event ON m_value.entry_id = m_event.entry_id
+//              WHERE m_value.meta_key = 'text-5'
+//                AND m_value.meta_value LIKE %s
+//                AND m_email.meta_key = 'email-1'
+//                AND m_event.meta_key = 'text-3'
+//                AND LOWER(TRIM(m_event.meta_value)) = %s",
+//             $prefix . '%',
+//             $event_slug_db
+//         )
+//     );
+
+//     $next_number = $max_num ? $max_num + 1 : 1001;
+//     $next_formatted = $prefix . sprintf("%04d", $next_number);
+
+//     wp_send_json_success(['next_prefix_number' => $next_formatted]);
+//     wp_die();
+// }
+
+
 add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
 add_action('wp_ajax_nopriv_check_user_registration', 'handle_check_user_registration');
 function handle_check_user_registration() {
     global $wpdb;
 
     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-    $event_slug = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : '';
+    $event_id = isset($_POST['event_id']) ? intval($_POST['event_id']) : 0;
 
-    if (empty($email) || empty($event_slug)) {
+    if (empty($email) || empty($event_id)) {
         wp_send_json_error(['message' => 'Missing parameters']);
         wp_die();
     }
 
-    // Convert slug to label, lowercase and trim for consistency
-    $event_label = strtolower(trim(ucwords(str_replace('-', ' ', $event_slug))));
-
     // Log for debugging (check PHP error log)
-    error_log("Checking email: $email; Event: $event_slug; Converted label: $event_label");
+    error_log("Checking email: $email; Event ID: $event_id");
 
     $entry_exists = $wpdb->get_var(
         $wpdb->prepare(
@@ -729,9 +813,9 @@ function handle_check_user_registration() {
              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
              WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
-               AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s",
+               AND m_event.meta_key = 'text-6' AND m_event.meta_value = %d",
             $email,
-            $event_label
+            $event_id
         )
     );
 
@@ -746,15 +830,14 @@ function handle_check_user_registration() {
 
 add_action('wp_ajax_get_next_prefix_number', 'get_next_prefix_number_callback');
 add_action('wp_ajax_nopriv_get_next_prefix_number', 'get_next_prefix_number_callback');
-
 function get_next_prefix_number_callback() {
     global $wpdb;
 
     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-    $event_slug = isset($_POST['event_slug']) ? sanitize_text_field($_POST['event_slug']) : '';
+    $event_id = isset($_POST['event_id']) ? intval($_POST['event_id']) : 0;
     $prefix = isset($_POST['event_prefix']) ? sanitize_text_field($_POST['event_prefix']) : '';
 
-    if (empty($email) || empty($event_slug)) {
+    if (empty($email) || empty($event_id)) {
         wp_send_json_error(['message' => 'Missing parameters']);
         wp_die();
     }
@@ -763,8 +846,6 @@ function get_next_prefix_number_callback() {
         $current_month_shortcode = strtoupper(date('M'));
         $prefix = "RBA/{$current_month_shortcode}/";
     }
-
-    $event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
 
     $max_num = $wpdb->get_var(
         $wpdb->prepare(
@@ -775,10 +856,10 @@ function get_next_prefix_number_callback() {
              WHERE m_value.meta_key = 'text-5'
                AND m_value.meta_value LIKE %s
                AND m_email.meta_key = 'email-1'
-               AND m_event.meta_key = 'text-3'
-               AND LOWER(TRIM(m_event.meta_value)) = %s",
+               AND m_event.meta_key = 'text-6'
+               AND m_event.meta_value = %d",
             $prefix . '%',
-            $event_slug_db
+            $event_id
         )
     );
 
@@ -788,7 +869,6 @@ function get_next_prefix_number_callback() {
     wp_send_json_success(['next_prefix_number' => $next_formatted]);
     wp_die();
 }
-
 
 add_action('wp_footer', function () {
     if (is_page('event-register')) :
@@ -989,12 +1069,14 @@ add_action('wp_footer', function () {
             var ceaEventDataRaw = getCookie('cea_event_data');
             var eventSlug = '';
             var eventPrefix = '';
+            var eventId='';
             if (ceaEventDataRaw) {
                 try {
                     var ceaEventData = JSON.parse(decodeURIComponent(ceaEventDataRaw));
                     if (ceaEventData.event_title) {
                         eventSlug = decodeHtmlEntities(ceaEventData.event_title);
                         eventPrefix = ceaEventData.prefix;
+                        eventId = parseInt(ceaEventData.event_id);
                     }
                 } catch(e) {
                     console.error('Failed to parse cea_event_data cookie JSON:', e);
@@ -1016,12 +1098,13 @@ add_action('wp_footer', function () {
                     data: {
                         action: 'get_next_prefix_number',
                         email: userEmail,
-                        event_slug: eventSlug,
+                        event_id: eventId,
                         event_prefix: eventPrefix
                     },
                     success: function(res) {
                         if (res.success && res.data.next_prefix_number) {
                             $('[name="text-5"]').val(res.data.next_prefix_number);
+                            $('[name="text-6"]').val(eventId);
                         }
                         $(".forminator-button-submit").trigger("click");
                     },
@@ -1044,7 +1127,7 @@ add_action('wp_footer', function () {
                 data: {
                     action: 'check_user_registration',
                     email: userEmail,
-                    event: eventSlug
+                    event_id: eventId,
                 },
                 success: function(response) {
                     if (response.success && response.data && response.data.registered) {
@@ -1094,12 +1177,13 @@ add_action('wp_footer', function () {
                                         data: {
                                             action: 'get_next_prefix_number',
                                             email: userEmail,
-                                            event_slug: eventSlug,
+                                            event_id: eventId,
                                             event_prefix: eventPrefix
                                         },
                                         success: function(res) {
                                             if(res.success && res.data.next_prefix_number) {
                                                 $('[name="text-5"]').val(res.data.next_prefix_number);
+                                                $('[name="text-6"]').val(eventId);
                                             }
                                         },
                                         error: function() {
