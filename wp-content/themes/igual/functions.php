@@ -576,7 +576,6 @@ function enqueue_event_type_autofill_script() {
                 costInput.style.whiteSpace = "nowrap";
                 costInput.style.overflow = "hidden";
                 costInput.style.textOverflow = "ellipsis";
-                costInput.setAttribute('title', eventCost);
             }
         });
 JS;
@@ -702,92 +701,6 @@ function activate_user_after_payment_callback() {
 
     wp_send_json_success('User activated, role assigned, and payment info saved.');
 }
-
-// add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
-// add_action('wp_ajax_nopriv_check_user_registration', 'handle_check_user_registration');
-// function handle_check_user_registration() {
-//     global $wpdb;
-
-//     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-//     $event_slug = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : '';
-
-//     if (empty($email) || empty($event_slug)) {
-//         wp_send_json_error(['message' => 'Missing parameters']);
-//         wp_die();
-//     }
-
-//     // Convert slug to label, lowercase and trim for consistency
-//     $event_label = strtolower(trim(ucwords(str_replace('-', ' ', $event_slug))));
-
-//     // Log for debugging (check PHP error log)
-//     error_log("Checking email: $email; Event: $event_slug; Converted label: $event_label");
-
-//     $entry_exists = $wpdb->get_var(
-//         $wpdb->prepare(
-//             "SELECT COUNT(*)
-//              FROM {$wpdb->prefix}frmt_form_entry e
-//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_email ON e.entry_id = m_email.entry_id
-//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta m_event ON e.entry_id = m_event.entry_id
-//              WHERE m_email.meta_key = 'email-1' AND m_email.meta_value = %s
-//                AND m_event.meta_key = 'text-3' AND LOWER(TRIM(m_event.meta_value)) = %s",
-//             $email,
-//             $event_label
-//         )
-//     );
-
-//     if ($entry_exists) {
-//         wp_send_json_success(['registered' => true]);
-//     } else {
-//         wp_send_json_success(['registered' => false]);
-//     }
-
-//     wp_die();
-// }
-
-// add_action('wp_ajax_get_next_prefix_number', 'get_next_prefix_number_callback');
-// add_action('wp_ajax_nopriv_get_next_prefix_number', 'get_next_prefix_number_callback');
-
-// function get_next_prefix_number_callback() {
-//     global $wpdb;
-
-//     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-//     $event_slug = isset($_POST['event_slug']) ? sanitize_text_field($_POST['event_slug']) : '';
-//     $prefix = isset($_POST['event_prefix']) ? sanitize_text_field($_POST['event_prefix']) : '';
-
-//     if (empty($email) || empty($event_slug)) {
-//         wp_send_json_error(['message' => 'Missing parameters']);
-//         wp_die();
-//     }
-
-//     if (empty($prefix)) {
-//         $current_month_shortcode = strtoupper(date('M'));
-//         $prefix = "RBA/{$current_month_shortcode}/";
-//     }
-
-//     $event_slug_db = strtolower(str_replace('-', ' ', $event_slug));
-
-//     $max_num = $wpdb->get_var(
-//         $wpdb->prepare(
-//             "SELECT MAX(CAST(SUBSTRING_INDEX(m_value.meta_value, '/', -1) AS UNSIGNED))
-//              FROM {$wpdb->prefix}frmt_form_entry_meta AS m_value
-//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_email ON m_value.entry_id = m_email.entry_id
-//              INNER JOIN {$wpdb->prefix}frmt_form_entry_meta AS m_event ON m_value.entry_id = m_event.entry_id
-//              WHERE m_value.meta_key = 'text-5'
-//                AND m_value.meta_value LIKE %s
-//                AND m_email.meta_key = 'email-1'
-//                AND m_event.meta_key = 'text-3'
-//                AND LOWER(TRIM(m_event.meta_value)) = %s",
-//             $prefix . '%',
-//             $event_slug_db
-//         )
-//     );
-
-//     $next_number = $max_num ? $max_num + 1 : 1001;
-//     $next_formatted = $prefix . sprintf("%04d", $next_number);
-
-//     wp_send_json_success(['next_prefix_number' => $next_formatted]);
-//     wp_die();
-// }
 
 
 add_action('wp_ajax_check_user_registration', 'handle_check_user_registration');
@@ -1089,36 +1002,60 @@ add_action('wp_footer', function () {
             }
      
             if (razorpayAmount === 0) {
-                $('[name="text-1"]').val('');
-                $('[name="text-2"]').val('');
                 $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
+
+                // Step 1: Check if user is already registered for the event
                 $.ajax({
                     url: '<?php echo admin_url("admin-ajax.php"); ?>',
                     type: 'POST',
                     data: {
-                        action: 'get_next_prefix_number',
+                        action: 'check_user_registration',
                         email: userEmail,
                         event_id: eventId,
-                        event_prefix: eventPrefix
                     },
-                    success: function(res) {
-                        if (res.success && res.data.next_prefix_number) {
-                            $('[name="text-5"]').val(res.data.next_prefix_number);
-                            $('[name="text-6"]').val(eventId);
+                    success: function(response) {
+                        if (response.success && response.data && response.data.registered) {
+                            showCustomPopup('You are already registered for this event.');
+                            $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            return;
                         }
-                        $(".forminator-button-submit").trigger("click");
+                
+                        $('[name="text-1"]').val('');
+                        $('[name="text-2"]').val('');
+                        $.ajax({
+                            url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                            type: 'POST',
+                            data: {
+                                action: 'get_next_prefix_number',
+                                email: userEmail,
+                                event_id: eventId,
+                                event_prefix: eventPrefix
+                            },
+                            success: function(res) {
+                                if (res.success && res.data.next_prefix_number) {
+                                    $('[name="text-5"]').val(res.data.next_prefix_number);
+                                    $('[name="text-6"]').val(eventId);
+                                }
+                                $(".forminator-button-submit").trigger("click");
+                            },
+                            error: function() {
+                                showCustomPopup('Error fetching prefix number. Please try again.');
+                                $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            },
+                            complete: function(){
+                                $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
+                            }
+                        });
                     },
                     error: function() {
-                        showCustomPopup('Error fetching prefix number. Please try again.');
-                        $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
-                    },
-                    complete: function(){
+                        showCustomPopup('Could not verify registration. Please try again.');
                         $btn.removeClass('rzp-btn-loading').prop('disabled', false).html(originalHtml);
                     }
                 });
             
                 return; 
             }
+
             $btn.addClass('rzp-btn-loading').prop('disabled', true).html('Checking...');
 
             $.ajax({
