@@ -28,10 +28,10 @@ define('DB_NAME', 'railway');
 define('DB_USER', 'root');
 
 /** Database password */
-define('DB_PASSWORD', 'YDjlgeUWCisinTjjRWgsPbaBTHCuYQpZ');
+define('DB_PASSWORD', 'jOlwCOMqnGGTSOPlyLlTSIDjRTRVviuT');
 
 /** Database hostname (include port) */
-define('DB_HOST', 'switchyard.proxy.rlwy.net:10602');
+define('DB_HOST', 'nozomi.proxy.rlwy.net');
 
 /** Database charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
@@ -91,15 +91,13 @@ define('WP_DEBUG', false);
 
 /* Add any custom values between this line and the "stop editing" line. */
 
-
+@ini_set( 'upload_max_size' , '64M' );
+@ini_set( 'post_max_size', '64M');
+@ini_set( 'memory_limit', '128M' );
 
 /* That's all, stop editing! Happy publishing. */
 define('WP_HOME', 'https://lapp-production.up.railway.app');
 define('WP_SITEURL', 'https://lapp-production.up.railway.app');
-
-@ini_set( 'upload_max_size' , '64M' );
-@ini_set( 'post_max_size', '64M');
-@ini_set( 'memory_limit', '128M' );
 
 // Force WordPress to recognize HTTPS behind Railway proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
