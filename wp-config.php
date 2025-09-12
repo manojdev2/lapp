@@ -31,7 +31,7 @@ define('DB_USER', 'root');
 define('DB_PASSWORD', 'jOlwCOMqnGGTSOPlyLlTSIDjRTRVviuT');
 
 /** Database hostname (include port) */
-define('DB_HOST', 'nozomi.proxy.rlwy.net');
+define('DB_HOST', 'nozomi.proxy.rlwy.net:19735');
 
 /** Database charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
